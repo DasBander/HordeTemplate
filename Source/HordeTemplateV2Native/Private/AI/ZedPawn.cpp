@@ -253,6 +253,7 @@ void AZedPawn::KillAI(ACharacter* Killer, EPointType KillType)
 
 /** ( Bound to Delegate )
  *	Check if Player is colliding with AI. Sets the Blackboard Variable "PlayerInRange".
+ *	Uses a counter to properly track multiple players entering/exiting range.
  *
  * @param UPrimitiveComponent ( Overlapping Component ), AActor ( Other Actor ), UPrimitiveComponent ( Other Component ), int32 ( Other Body Index ), bool ( bFromSweep ), FHitResult ( Sweep Result )
  * @return void
@@ -260,8 +261,9 @@ void AZedPawn::KillAI(ACharacter* Killer, EPointType KillType)
 void AZedPawn::OnCharacterInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	AHordeBaseCharacter* Char = Cast<AHordeBaseCharacter>(OtherActor);
-	if (Char)
+	if (Char && !Char->GetIsDead())
 	{
+		PlayersInRangeCount++;
 		AZedAIController* AIC = Cast<AZedAIController>(GetController());
 		if (AIC && AIC->GetBlackboardComponent())
 		{
@@ -271,7 +273,8 @@ void AZedPawn::OnCharacterInRange(UPrimitiveComponent* OverlappedComponent, AAct
 }
 
 /** ( Bound to Delegate )
- *	Resets BlackboardKey "PlayerInRange" if Horde Character stepped out of collision.
+ *	Resets BlackboardKey "PlayerInRange" if all Horde Characters stepped out of collision.
+ *	Only sets PlayerInRange to false when no players remain in range.
  *
  * @param UPrimitiveComponent ( Overlapping Component ), AActor ( Other Actor ), UPrimitiveComponent ( Other Component ), int32 ( Other Body Index )
  * @return void
@@ -281,10 +284,14 @@ void AZedPawn::OnCharacterOutRange(UPrimitiveComponent* OverlappedComponent, AAc
 	AHordeBaseCharacter* Char = Cast<AHordeBaseCharacter>(OtherActor);
 	if (Char)
 	{
-		AZedAIController* AIC = Cast<AZedAIController>(GetController());
-		if (AIC && AIC->GetBlackboardComponent())
+		PlayersInRangeCount = FMath::Max(0, PlayersInRangeCount - 1);
+		if (PlayersInRangeCount == 0)
 		{
-			AIC->GetBlackboardComponent()->SetValueAsBool("PlayerInRange", false);
+			AZedAIController* AIC = Cast<AZedAIController>(GetController());
+			if (AIC && AIC->GetBlackboardComponent())
+			{
+				AIC->GetBlackboardComponent()->SetValueAsBool("PlayerInRange", false);
+			}
 		}
 	}
 }

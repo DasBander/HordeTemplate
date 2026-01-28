@@ -183,6 +183,14 @@ FTransform AHordeGameMode::GetRandomPlayerSpawn()
 			SpawnPoints.Add(LocalTrans);
 		}
 	}
+
+	// Safety check: return default transform if no spawn points found
+	if (SpawnPoints.Num() == 0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetRandomPlayerSpawn: No PlayerStart actors found in world! Returning default transform."));
+		return FTransform();
+	}
+
 	return SpawnPoints[FMath::RandRange(0, (SpawnPoints.Num() - 1))];
 }
 

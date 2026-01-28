@@ -307,9 +307,17 @@ float AHordeBaseCharacter::TakeDamage(float Damage, struct FDamageEvent const& D
  */
 void AHordeBaseCharacter::PlayAnimationAllClients_Implementation(class UAnimMontage* Montage)
 {
-	UAnimMontage* Mont = ObjectFromPath<UAnimMontage>(TEXT("AnimMontage'/Game/HordeTemplateBP/Assets/Animations/AM_Reload_Rifle.AM_Reload_Rifle'"));
-	GetMesh()->GetAnimInstance()->Montage_Play(Mont, 1.f, EMontagePlayReturnType::Duration, 0.f, false);
+	// Use the passed Montage parameter, fallback to default reload animation if null
+	UAnimMontage* MontageToPlay = Montage;
+	if (!MontageToPlay)
+	{
+		MontageToPlay = ObjectFromPath<UAnimMontage>(TEXT("AnimMontage'/Game/HordeTemplateBP/Assets/Animations/AM_Reload_Rifle.AM_Reload_Rifle'"));
+	}
 
+	if (MontageToPlay && GetMesh() && GetMesh()->GetAnimInstance())
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(MontageToPlay, 1.f, EMontagePlayReturnType::Duration, 0.f, false);
+	}
 }
 
 bool AHordeBaseCharacter::PlayAnimationAllClients_Validate(class UAnimMontage* Montage)
@@ -327,7 +335,9 @@ bool AHordeBaseCharacter::PlayAnimationAllClients_Validate(class UAnimMontage* M
 bool AHordeBaseCharacter::RemoveHealth(float HealthToRemove)
 {
 	Health = FMath::Clamp<float>((Health - HealthToRemove), 0.f, 100.f);
-	UpdateHeadDisplayWidget(GetPlayerState()->GetPlayerName(), Health);
+	const APlayerState* PS = GetPlayerState();
+	const FString PlayerName = PS ? PS->GetPlayerName() : TEXT("");
+	UpdateHeadDisplayWidget(PlayerName, Health);
 	return (Health <= 0.f);
 }
 
@@ -911,7 +921,8 @@ void AHordeBaseCharacter::ServerReload_Implementation()
 			FItem TempItem = UInventoryHelpers::FindItemByID(FName(*CurrentSelectedFirearm->WeaponID));
 			int32 AmmoIndex;
 			int32 AmmoAmount = Inventory->CountAmmo(TempItem.AmmoType, AmmoIndex);
-			if (AmmoAmount > 0 && (TempItem.DefaultLoadedAmmo != CurrentSelectedFirearm->LoadedAmmo))
+			// Fixed: Compare against MaximumLoadedAmmo to allow reload when magazine isn't full
+			if (AmmoAmount > 0 && (TempItem.MaximumLoadedAmmo != CurrentSelectedFirearm->LoadedAmmo))
 			{
 				Reloading = true;
 				if (TempItem.PlayerAnimationData.CharacterReloadAnimation && GetMesh()->GetAnimInstance())
@@ -944,7 +955,9 @@ void AHordeBaseCharacter::AddHealth(float InHealth)
 	if (HasAuthority())
 	{
 		Health = FMath::Clamp<float>(Health + InHealth, 0.f, 100.f);
-		UpdateHeadDisplayWidget(GetPlayerState()->GetPlayerName(), Health);
+		const APlayerState* PS = GetPlayerState();
+		const FString PlayerName = PS ? PS->GetPlayerName() : TEXT("");
+		UpdateHeadDisplayWidget(PlayerName, Health);
 	}
 }
 

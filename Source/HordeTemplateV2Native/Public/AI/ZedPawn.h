@@ -66,6 +66,10 @@ protected:
 
 	UFUNCTION()
 		void OnCharacterOutRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	// Track number of players in range to properly handle multiple players
+	UPROPERTY()
+		int32 PlayersInRangeCount = 0;
 public:	
 	FORCEINLINE float GetHealth() { return Health; };
 	FORCEINLINE bool GetIsDead() { return IsDead; };

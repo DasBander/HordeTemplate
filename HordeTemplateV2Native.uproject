@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.6",
+	"EngineAssociation": "5.7",
 	"Category": "Frameworks",
 	"Description": "Horde Template V2 C++ ( Native C++ Version ) gives you the ability to create awesome horde games.",
 	"Modules": [
@@ -91,27 +91,6 @@
 		{
 			"Name": "LauncherChunkInstaller",
 			"Enabled": false
-		},
-		{
-			"Name": "MagicLeapMedia",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Lumin"
-			]
-		},
-		{
-			"Name": "MagicLeapEmulator",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Lumin"
-			]
-		},
-		{
-			"Name": "MagicLeap",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Lumin"
-			]
 		},
 		{
 			"Name": "LocationServicesBPLibrary",
