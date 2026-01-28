@@ -53,6 +53,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Server, WithValidation, Reliable, Category = "Interaction")
 		void ServerInteract(AActor* ActorToInteractWith);
+
+	UFUNCTION(Server, Reliable, WithValidation, Category = "Interaction")
+		void ServerSetInteracting(bool bNewInteracting);
 	
 	UFUNCTION()
 		virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
@@ -90,6 +93,10 @@ protected:
 	UFUNCTION()
 		void ProcessInteraction();
 
+	/** Stops all interaction detection and cleans up state (call on death/destroy) */
+	UFUNCTION()
+		void CleanupInteraction();
+
 	UFUNCTION()
 		void HeadDisplayTrace();
 
@@ -99,7 +106,7 @@ protected:
 	UFUNCTION()
 		void InteractionDetection();
 
-	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Interaction")
 		bool IsInteracting = false;
 
 	virtual void PostInitializeComponents() override;
@@ -184,26 +191,9 @@ protected:
 
 	
 
-	UPROPERTY(BlueprintReadOnly, Category = "Firearm")
-		bool IsBursting = false;
-
-	UPROPERTY()
-		FTimerHandle WeaponFireTimer;
-
+	/** Cached weapon info for quick access */
 	UPROPERTY()
 		FItem CurrentWeaponInfo;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Firearm")
-		FTimerHandle BurstTimer;
-
-	UFUNCTION()
-		void BurstWeapon();
-
-	UFUNCTION()
-		void AutoFireWeapon();
-
-	UPROPERTY()
-		float NumberOfBursts = 0.f;
 
 
 	UFUNCTION()
@@ -253,6 +243,10 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Interaction")
 		float TargetInteractionTime = 0.f;
+
+	/** Maximum distance for valid interaction (used for server validation) */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Interaction")
+		float MaxInteractionDistance = 350.f;
 
 
 	UUserWidget* GetHeadDisplayWidget();
