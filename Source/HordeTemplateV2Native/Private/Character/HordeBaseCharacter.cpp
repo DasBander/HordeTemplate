@@ -4,6 +4,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Runtime/UMG/Public/UMG.h"
 #include "Inventory/InventoryHelpers.h"
+#include "Inventory/InteractionInterface.h"
 #include "Gameplay/HordeGameMode.h"
 #include "Weapons/BaseFirearm.h"
 #include "HUD/Widgets/PlayerHeadDisplay.h"
@@ -31,6 +32,7 @@ void AHordeBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(AHordeBaseCharacter, IsDead);
 	DOREPLIFETIME(AHordeBaseCharacter, Reloading);
 	DOREPLIFETIME(AHordeBaseCharacter, CurrentSelectedFirearm);
+	DOREPLIFETIME(AHordeBaseCharacter, IsInteracting);
 }
 
 
@@ -226,18 +228,82 @@ void AHordeBaseCharacter::OnRep_PlayerState()
  */
 void AHordeBaseCharacter::ServerInteract_Implementation(AActor* ActorToInteractWith)
 {
-	if (ActorToInteractWith)
+	// Validate actor and interface
+	if (!ActorToInteractWith || !IsValid(ActorToInteractWith))
 	{
-		IInteractionInterface::Execute_Interact(ActorToInteractWith, this);
-		FInteractionInfo InterInf = IInteractionInterface::Execute_GetInteractionInfo(ActorToInteractWith);
-		if (InterInf.InteractionSound)
-		{
-			PlaySoundOnAllClients(InterInf.InteractionSound, GetMesh()->GetComponentLocation());
-		}
+		return;
+	}
+
+	if (!ActorToInteractWith->Implements<UInteractionInterface>())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ServerInteract: Actor %s does not implement InteractionInterface"), *ActorToInteractWith->GetName());
+		return;
+	}
+
+	// Check if player is dead
+	if (IsDead)
+	{
+		return;
+	}
+
+	// Final check: is interaction still allowed?
+	FInteractionInfo InterInf = IInteractionInterface::Execute_GetInteractionInfo(ActorToInteractWith);
+	if (!InterInf.AllowedToInteract)
+	{
+		return;
+	}
+
+	// Execute the interaction
+	IInteractionInterface::Execute_Interact(ActorToInteractWith, this);
+
+	// Play interaction sound on all clients
+	if (InterInf.InteractionSound)
+	{
+		PlaySoundOnAllClients(InterInf.InteractionSound, GetMesh()->GetComponentLocation());
 	}
 }
 
 bool AHordeBaseCharacter::ServerInteract_Validate(AActor* ActorToInteractWith)
+{
+	// Basic null check
+	if (!ActorToInteractWith || !IsValid(ActorToInteractWith))
+	{
+		return false;
+	}
+
+	// Check if actor implements the interaction interface
+	if (!ActorToInteractWith->Implements<UInteractionInterface>())
+	{
+		return false;
+	}
+
+	// Distance validation - prevent interacting with objects too far away
+	const float DistanceSquared = FVector::DistSquared(GetActorLocation(), ActorToInteractWith->GetActorLocation());
+	const float MaxDistSquared = MaxInteractionDistance * MaxInteractionDistance;
+
+	if (DistanceSquared > MaxDistSquared)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ServerInteract_Validate: Player %s tried to interact with %s from too far away (%.1f > %.1f)"),
+			*GetName(), *ActorToInteractWith->GetName(), FMath::Sqrt(DistanceSquared), MaxInteractionDistance);
+		return false;
+	}
+
+	return true;
+}
+
+
+/** ( Server )
+ *	Updates the IsInteracting state on the server for replication.
+ *
+ * @param bNewInteracting - The new interaction state
+ * @return void
+ */
+void AHordeBaseCharacter::ServerSetInteracting_Implementation(bool bNewInteracting)
+{
+	IsInteracting = bNewInteracting;
+}
+
+bool AHordeBaseCharacter::ServerSetInteracting_Validate(bool bNewInteracting)
 {
 	return true;
 }
@@ -344,7 +410,7 @@ bool AHordeBaseCharacter::RemoveHealth(float HealthToRemove)
 
 
 /**
- *	Drops Current Item and lets Character Die. Sets lifespan to 20 seconds and enables physics on character. Spawns Spectator on server to possess with. 
+ *	Drops Current Item and lets Character Die. Sets lifespan to 20 seconds and enables physics on character. Spawns Spectator on server to possess with.
  *
  * @param
  * @return void
@@ -352,8 +418,14 @@ bool AHordeBaseCharacter::RemoveHealth(float HealthToRemove)
 void AHordeBaseCharacter::CharacterDie()
 {
 	IsDead = true;
+
+	// Clean up interaction system
+	CleanupInteraction();
+
+	// Stop firing and drop weapon
 	if (CurrentSelectedFirearm)
 	{
+		CurrentSelectedFirearm->ServerStopFiring();
 		Inventory->ServerDropItem(CurrentSelectedFirearm);
 	}
 	AHordePlayerState* PS = Cast<AHordePlayerState>(GetPlayerState());
@@ -383,22 +455,32 @@ void AHordeBaseCharacter::CharacterDie()
  */
 void AHordeBaseCharacter::StartInteraction()
 {
-	if (!IsInteracting && LastInteractionActor)
+	// Don't start interaction if dead, already interacting, or no valid target
+	if (IsDead || IsInteracting || !LastInteractionActor || !IsValid(LastInteractionActor))
 	{
-		InteractionProgress = 0.f;
-		FInteractionInfo InteractionInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
-		if (InteractionInfo.AllowedToInteract)
+		return;
+	}
+
+	// Verify actor still implements interface
+	if (!LastInteractionActor->Implements<UInteractionInterface>())
+	{
+		LastInteractionActor = nullptr;
+		return;
+	}
+
+	InteractionProgress = 0.f;
+	FInteractionInfo InteractionInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
+	if (InteractionInfo.AllowedToInteract)
+	{
+		AHordeBaseHUD* HUD = GetHUD();
+		if (HUD && HUD->GetHUDWidget())
 		{
-			// Fixed: Added null checks for HUD and HUDWidget
-			AHordeBaseHUD* HUD = GetHUD();
-			if (HUD && HUD->GetHUDWidget())
-			{
-				HUD->GetHUDWidget()->IsInteracting = true;
-			}
-			IsInteracting = true;
-			TargetInteractionTime = InteractionInfo.InteractionTime;
-			GetWorld()->GetTimerManager().SetTimer(InteractionTimer, this, &AHordeBaseCharacter::ProcessInteraction, .01f, true);
+			HUD->GetHUDWidget()->IsInteracting = true;
 		}
+		IsInteracting = true;
+		ServerSetInteracting(true);
+		TargetInteractionTime = InteractionInfo.InteractionTime;
+		GetWorld()->GetTimerManager().SetTimer(InteractionTimer, this, &AHordeBaseCharacter::ProcessInteraction, .01f, true);
 	}
 }
 
@@ -415,8 +497,14 @@ void AHordeBaseCharacter::StopInteraction()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(InteractionTimer);
 	}
-	IsInteracting = false;
-	// Fixed: Added null checks for HUD and HUDWidget
+
+	// Only sync with server if we were actually interacting
+	if (IsInteracting)
+	{
+		IsInteracting = false;
+		ServerSetInteracting(false);
+	}
+
 	AHordeBaseHUD* HUD = GetHUD();
 	if (HUD && HUD->GetHUDWidget())
 	{
@@ -435,30 +523,87 @@ void AHordeBaseCharacter::StopInteraction()
  */
 void AHordeBaseCharacter::ProcessInteraction()
 {
-	if (LastInteractionActor)
+	// Validate actor is still valid
+	if (!LastInteractionActor || !IsValid(LastInteractionActor))
 	{
-		if (InteractionTime >= TargetInteractionTime)
-		{
-			StopInteraction();
-			if (LastInteractionActor)
-			{
-				ServerInteract(LastInteractionActor);
-			}
-		}
-		else {
-			InteractionTime = InteractionTime + 0.01f;
-			InteractionProgress = FMath::GetMappedRangeValueClamped(FVector2D(0.f, TargetInteractionTime), FVector2D(0.f, 100.f), InteractionTime);
-		}
-		FInteractionInfo InteractionInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
-		if (!InteractionInfo.AllowedToInteract || IsDead)
-		{
-			StopInteraction();
-		}
-	}
-	else {
 		StopInteraction();
+		return;
 	}
-	
+
+	// Check if player died during interaction
+	if (IsDead)
+	{
+		StopInteraction();
+		return;
+	}
+
+	// Verify actor still implements interface
+	if (!LastInteractionActor->Implements<UInteractionInterface>())
+	{
+		LastInteractionActor = nullptr;
+		StopInteraction();
+		return;
+	}
+
+	// Check if interaction is still allowed (needed for UI feedback like outline)
+	FInteractionInfo InteractionInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
+	if (!InteractionInfo.AllowedToInteract)
+	{
+		StopInteraction();
+		return;
+	}
+
+	// Check if interaction is complete
+	if (InteractionTime >= TargetInteractionTime)
+	{
+		AActor* ActorToInteract = LastInteractionActor;
+		StopInteraction();
+		if (ActorToInteract && IsValid(ActorToInteract))
+		{
+			ServerInteract(ActorToInteract);
+		}
+	}
+	else
+	{
+		// Progress the interaction
+		InteractionTime = InteractionTime + 0.01f;
+		InteractionProgress = FMath::GetMappedRangeValueClamped(FVector2D(0.f, TargetInteractionTime), FVector2D(0.f, 100.f), InteractionTime);
+	}
+}
+
+
+/**
+ *	Stops all interaction detection and cleans up state. Call on death or destroy.
+ *
+ * @param
+ * @return void
+ */
+void AHordeBaseCharacter::CleanupInteraction()
+{
+	// Stop any ongoing interaction
+	StopInteraction();
+
+	// Clear interaction detection timer
+	if (GetWorld()->GetTimerManager().IsTimerActive(InteractionDetectionTimer))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(InteractionDetectionTimer);
+	}
+
+	// Clear head display trace timer
+	if (GetWorld()->GetTimerManager().IsTimerActive(HeadDisplayTraceTimer))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(HeadDisplayTraceTimer);
+	}
+
+	// Clear last interaction actor
+	LastInteractionActor = nullptr;
+
+	// Hide interaction text on HUD
+	AHordeBaseHUD* HUD = GetHUD();
+	if (HUD && HUD->GetHUDWidget())
+	{
+		HUD->GetHUDWidget()->OnHideInteractionText.Broadcast();
+	}
 }
 
 
@@ -520,12 +665,27 @@ void AHordeBaseCharacter::HeadDisplayTrace()
  */
 void AHordeBaseCharacter::InteractionDetection()
 {
+	// Don't detect interactions if dead
+	if (IsDead)
+	{
+		if (LastInteractionActor)
+		{
+			LastInteractionActor = nullptr;
+			AHordeBaseHUD* HUD = GetHUD();
+			if (HUD && HUD->GetHUDWidget())
+			{
+				HUD->GetHUDWidget()->OnHideInteractionText.Broadcast();
+			}
+		}
+		return;
+	}
+
 	FCollisionQueryParams TraceParams = FCollisionQueryParams(FName(TEXT("ItemTrace")), true, GetOwner());
 	TraceParams.bTraceComplex = true;
 	TraceParams.bReturnPhysicalMaterial = false;
 	TraceParams.AddIgnoredActor(GetOwner());
 	FHitResult HitResult(ForceInit);
-	
+
 
 	const TArray<AActor*> IgnoringActors;
 
@@ -557,7 +717,8 @@ void AHordeBaseCharacter::InteractionDetection()
 				}
 
 			}
-			else {
+			else
+			{
 				LastInteractionActor = nullptr;
 				AHordeBaseHUD* HUD = GetHUD();
 				if (HUD && HUD->GetHUDWidget())
@@ -566,9 +727,10 @@ void AHordeBaseCharacter::InteractionDetection()
 				}
 			}
 		}
-		
+
 	}
-	else {
+	else
+	{
 		LastInteractionActor = nullptr;
 		AHordeBaseHUD* HUD = GetHUD();
 		if (HUD && HUD->GetHUDWidget())
@@ -768,102 +930,54 @@ AHordeBaseHUD* AHordeBaseCharacter::GetHUD()
 
 
 /**
- *	Stops Weapon Fire Timer.
+ *	Stops Weapon Fire - tells server to stop firing.
  *
  * @param
  * @return void
  */
 void AHordeBaseCharacter::StopWeaponFire()
 {
-	if (GetWorld()->GetTimerManager().IsTimerActive(WeaponFireTimer))
+	if (CurrentSelectedFirearm)
 	{
-		GetWorld()->GetTimerManager().ClearTimer(WeaponFireTimer);
+		CurrentSelectedFirearm->ServerStopFiring();
 	}
 }
 
 
 /**
- *	Starts Weapon Fire depending on the FireMode of the Current Selected Weapon.
+ *	Starts Weapon Fire - server-authoritative firing system handles timing.
  *
  * @param
  * @return void
  */
 void AHordeBaseCharacter::TriggerWeaponFire()
 {
-	if (!(Reloading || IsBursting) && !IsDead)
+	// Basic client-side checks to prevent unnecessary RPCs
+	if (Reloading || IsDead)
 	{
-		if (CurrentSelectedFirearm)
-		{
-			CurrentWeaponInfo = UInventoryHelpers::FindItemByID(FName(*CurrentSelectedFirearm->WeaponID));
-			if (CurrentWeaponInfo.FirearmClass != nullptr)
-			{
-				switch ((EFireMode)CurrentSelectedFirearm->FireMode) 
-				{
-
-				case EFireMode::EFireModeBurst:
-					GetWorld()->GetTimerManager().SetTimer(BurstTimer, this, &AHordeBaseCharacter::BurstWeapon, CurrentWeaponInfo.FireRate, true);
-					IsBursting = true;
-					break;
-
-				case EFireMode::EFireModeFull:
-					CurrentSelectedFirearm->ServerFireFirearm();
-					GetWorld()->GetTimerManager().SetTimer(WeaponFireTimer, this, &AHordeBaseCharacter::AutoFireWeapon, CurrentWeaponInfo.FireRate, true);
-					break;
-
-				case EFireMode::EFireModeSingle:
-					CurrentSelectedFirearm->ServerFireFirearm();
-				break;
-
-				default:
-					break;
-				}
-			}
-		}
+		return;
 	}
+
+	if (!CurrentSelectedFirearm)
+	{
+		return;
+	}
+
+	// Check if weapon is already firing (burst in progress, etc.)
+	if (CurrentSelectedFirearm->bIsFiring)
+	{
+		return;
+	}
+
+	// Cache weapon info for local reference
+	CurrentWeaponInfo = UInventoryHelpers::FindItemByID(FName(*CurrentSelectedFirearm->WeaponID));
+
+	// Let the server handle all firing logic - timing, burst count, auto fire
+	// Server will validate and execute appropriately based on fire mode
+	CurrentSelectedFirearm->ServerStartFiring();
 }
 
 
-/**
- *	Lets the Weapon burst depending on the Amount of Bursts defined in the Item Definition.
- *
- * @param
- * @return void
- */
-void AHordeBaseCharacter::BurstWeapon()
-{
-	if (NumberOfBursts >= CurrentWeaponInfo.BurstFireAmount || IsDead)
-	{
-		GetWorld()->GetTimerManager().ClearTimer(BurstTimer);
-		NumberOfBursts = 0.f;
-		IsBursting = false;
-	}
-	else {
-		if (CurrentSelectedFirearm)
-		{
-			CurrentSelectedFirearm->ServerFireFirearm();
-			NumberOfBursts = NumberOfBursts + 1.f;
-		}
-	}
-}
-
-
-/**
- *	Lets the Weapon Automatic Fire and stops if reloading or dead.
- *
- * @param
- * @return void
- */
-void AHordeBaseCharacter::AutoFireWeapon()
-{
-	if (CurrentSelectedFirearm)
-	{
-		CurrentSelectedFirearm->ServerFireFirearm();
-		if (Reloading || IsDead)
-		{
-			StopWeaponFire();
-		}
-	}
-}
 
 /**
  *	Switches Firemode in Firearm and plays sound on all clients.
@@ -939,6 +1053,9 @@ void AHordeBaseCharacter::ServerReload_Implementation()
 			// Fixed: Compare against MaximumLoadedAmmo to allow reload when magazine isn't full
 			if (AmmoAmount > 0 && (TempItem.MaximumLoadedAmmo != CurrentSelectedFirearm->LoadedAmmo))
 			{
+				// Stop any ongoing firing before reloading
+				CurrentSelectedFirearm->ServerStopFiring();
+
 				Reloading = true;
 				if (TempItem.PlayerAnimationData.CharacterReloadAnimation && GetMesh()->GetAnimInstance())
 				{

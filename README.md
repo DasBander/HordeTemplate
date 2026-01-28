@@ -1,4 +1,4 @@
-# Horde Template V2 (Native) - v2.7.3
+# Horde Template V2 (Native) - v2.8.0
 
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.7-blue)](https://www.unrealengine.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -38,15 +38,27 @@ Originally a premium Unreal Marketplace asset, now released to the community for
 - **Seamless Map Travel** - Map rotation with server travel support
 
 ### Combat & Inventory
-- **Modular Weapon System** - Support for multiple fire modes (Single, Burst, Full-Auto)
+- **Competitive Weapon System** - Server-authoritative timing, anti-cheat validation
+- **Weapon Spread System** - Movement/airborne penalties, bloom mechanics
+- **Modular Fire Modes** - Single, Burst, Full-Auto with precise server timing
 - **Projectile-Based Combat** - Headshot detection with bonus rewards
 - **Advanced Inventory System** - Drop & pickup mechanics, ammo management
 - **Health & Stamina** - Sprint mechanics with stamina drain/recovery
 
 ### AI & Enemies
-- **Zombie AI with Behavior Trees** - Patrol, chase, and attack behaviors
+- **Natural Zombie AI** - State-based behavior (Idle, Patrol, Alert, Chase, Attack, Staggered)
+- **Smooth AI Movement** - Interpolated speed transitions, per-zombie variation
+- **Investigation System** - Tracks last known position, validates line-of-sight
+- **Hit Reactions** - Stagger and anger burst responses to damage
+- **Dynamic Zombie Spawner** - Distance-based, vision-aware, exhaustion system
 - **AI Perception System** - Sight-based detection with configurable ranges
-- **Spawn Point System** - Flexible zombie spawning with wave multipliers
+
+### Quest System
+- **Linear Cooperative Quests** - All players share objectives
+- **Multiple Objective Types** - Kill, collect, location, interact, survive, escort
+- **Quest Chains** - Automatic follow-up quests on completion
+- **World Triggers** - QuestTrigger actors for event-based activation
+- **Collectible Items** - QuestItem actors with visual effects
 
 ### UI & HUD
 - **Complete HUD System** - Health, ammo, interaction prompts, crosshair
@@ -102,7 +114,7 @@ Originally a premium Unreal Marketplace asset, now released to the community for
 HordeTemplateV2Native/
 ├── Source/HordeTemplateV2Native/
 │   ├── Public/                    # Header files
-│   │   ├── AI/                    # Zombie AI (Pawn, Controller, Tasks)
+│   │   ├── AI/                    # Zombie AI (Pawn, Controller, Tasks, Spawner)
 │   │   ├── Animation/             # Animation instance classes
 │   │   ├── Character/             # Player character & spectator
 │   │   ├── FX/                    # Camera shakes & impact effects
@@ -111,6 +123,7 @@ HordeTemplateV2Native/
 │   │   ├── Inventory/             # Inventory system
 │   │   ├── Misc/                  # Doors, Trader, Triggers
 │   │   ├── Projectiles/           # Projectile classes
+│   │   ├── Quest/                 # Quest system (Manager, Triggers, Items)
 │   │   └── Weapons/               # Firearm classes
 │   └── Private/                   # Implementation files
 ├── Content/HordeTemplateBP/
@@ -133,10 +146,21 @@ HordeTemplateV2Native/
 - 3D player name/health display
 
 ### AI System (`AZedPawn` + `AZedAIController`)
-- Behavior Tree-driven AI (`BT_Zed`)
-- Patrol, chase, and attack behaviors
-- Headshot detection for bonus points
+- State-based AI (Idle, Patrol, Alert, Chase, Attack, Staggered)
+- Smooth speed transitions with interpolation
+- Investigation behavior with last known position tracking
+- Line-of-sight validation during chase
+- Hit reactions (stagger/anger burst)
+- Attack cooldown and wind-up system
 - Configurable sight and chase ranges
+
+### Quest System (`UQuestManager` + `AQuestTrigger` + `AQuestItem`)
+- DataTable-driven quest definitions
+- Multiple objective types (kill, collect, location, interact, etc.)
+- Quest chains with follow-up quests
+- World triggers for quest activation
+- Collectible items with visual effects
+- Full multiplayer replication
 
 ### Inventory System (`UInventoryComponent`)
 - Item pickup and dropping
@@ -157,7 +181,7 @@ HordeTemplateV2Native/
 ### Key Definitions (`HordeTemplateV2Native.h`)
 
 ```cpp
-#define GAME_VERSION 2.7
+#define GAME_VERSION 2.8
 #define STARTING_MONEY 1500
 #define ZED_SIGHT_RADIUS 1000.f
 #define ZED_LOSE_SIGHT_RADIUS 2500.f
@@ -186,6 +210,82 @@ Default controls (configurable in `Config/DefaultInput.ini`):
 ---
 
 ## Changelog
+
+### Update 2.8.0 - Major Feature Update
+```
+New Feature: AAA Quest System
+- Complete quest framework with linear cooperative objectives
+- Quest types: Location, CollectItem, KillEnemies, KillSpecificType, Interact, Survive, Escort, TriggerSequence, Custom
+- Quest chains with follow-up quests on completion
+- QuestManager component (auto-attaches to GameState)
+- QuestTrigger actor for world-based quest activation
+- QuestItem actor for collectible objectives
+- DataTable-driven quest definitions (FQuestData)
+- Full multiplayer replication with progress sync
+- HordeWorldSettings integration for per-level quest configuration
+- Auto-start quests, quest HUD settings, notifications
+
+New Feature: Dynamic Zombie Spawner
+- Distance-based activation (only spawns when players in range)
+- Player vision check (won't spawn if player looking at spawn area)
+- Exhaustion system (max kills before deactivation)
+- Reactivation after delay (for backtracking gameplay)
+- Spawn modes: Continuous, Wave, Triggered
+- Difficulty scaling support
+- NavMesh-validated spawn positions
+
+New Feature: Zombie AI Natural Behavior
+- AI State system (Idle, Patrol, Alert, Chase, Attack, Staggered)
+- Smooth speed transitions (interpolated acceleration/deceleration)
+- Per-zombie speed variation (0.85x - 1.15x multiplier)
+- Last known enemy location tracking
+- Investigation behavior (moves to last seen position)
+- Line-of-sight validation (won't chase through walls)
+- Hit reactions: 30% stagger (slows), 70% anger burst (speeds up)
+- Attack cooldown system (1.5-2.5s between attacks)
+- Attack wind-up delay (0.3-0.5s telegraph)
+- New InvestigateLocation behavior tree task
+
+New Feature: Competitive Weapon System
+- Server-authoritative fire rate (prevents exploits)
+- Precise timing for Single, Burst, and Full-Auto modes
+- Fire rate validation with double-precision timestamps
+- Minimum 50ms between shots (prevents physics exploits)
+- Weapon ownership validation
+- Dead/reloading state validation
+- Burst fire completes full sequence (can't interrupt)
+- Auto-fire managed by server timers
+
+New Feature: Weapon Spread System
+- BaseSpreadAngle - configurable per weapon
+- MovingSpreadMultiplier - penalty when moving (1.5x default)
+- AirborneSpreadMultiplier - penalty when jumping (2.0x default)
+- SpreadIncreasePerShot - bloom per consecutive shot
+- MaxAccumulatedSpread - spread cap
+- SpreadResetTime - time to reset bloom (0.3s default)
+
+New Feature: Interaction System Overhaul
+- Server-side distance validation (MaxInteractionDistance)
+- Server-side actor validity checks
+- Interface implementation verification
+- Death state handling (stops detection when dead)
+- Timer cleanup on death (CleanupInteraction)
+- IsInteracting now replicated for server awareness
+- Race condition fixes for stale actor references
+
+Replication Improvements:
+- Weapon FiringState replicated for animation sync
+- bIsFiring state replicated
+- PlayFirearmFX now Reliable (was Unreliable)
+- Multicast notifications for firing start/stop
+- All ammo counts visible to all players
+
+Code Quality:
+- Removed client-side fire timing (BurstWeapon, AutoFireWeapon, timers)
+- Simplified character weapon code (server handles all timing)
+- Added explicit InteractionInterface include
+- Proper actor spawn parameters for projectiles
+```
 
 ### Update 2.7.3
 ```
