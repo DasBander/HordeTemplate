@@ -1,64 +1,253 @@
-# Horde Template ( Native ) - v2.6 ( Unreal Engine 5.6 )
-*"If You Love Something, Set It Free" - March 2, 2015 Tim*
+# Horde Template V2 (Native) - v2.7
 
+[![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.7-blue)](https://www.unrealengine.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![C++](https://img.shields.io/badge/C++-Native-orange)](https://docs.unrealengine.com/5.7/en-US/programming-with-cplusplus-in-unreal-engine/)
 
-This is the official release of the Marketplace Asset - Horde Template (Native) UE 5.3 also seen here:
-https://www.unrealengine.com/marketplace/en-US/product/horde-template-v2-native-horde-template-framework
+> *"If You Love Something, Set It Free"* - March 2, 2015 Tim
 
-I wanted to give the community something back after all these years of game development. So this is now open source.
+A fully-featured, open-source **C++ framework** for creating 4-player cooperative horde/zombie survival games in Unreal Engine 5.7.
 
-## - Update 2.6 (UE5.6)
+Originally a premium Unreal Marketplace asset, now released to the community for free under the MIT License.
+
+**[Marketplace Page](https://www.unrealengine.com/marketplace/en-US/product/horde-template-v2-native-horde-template-framework)** | **[Documentation](https://bugs.finalspark.io/docs/horde-template-native)** | **[Report Issues](https://github.com/DasBander/HordeTemplateV2Native/issues)**
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Project Structure](#project-structure)
+- [Core Systems](#core-systems)
+- [Configuration](#configuration)
+- [Changelog](#changelog)
+- [Contributing](#contributing)
+- [License](#license)
+- [Credits](#credits)
+
+---
+
+## Features
+
+### Gameplay Systems
+- **4-Player Cooperative Multiplayer** - Full network replication with Steam integration
+- **Wave-Based Zombie Survival** - Configurable rounds with difficulty scaling
+- **Advanced Lobby System** - Character selection, player management, ready states
+- **Trader/Shop System** - Buy weapons and items between rounds
+- **Seamless Map Travel** - Map rotation with server travel support
+
+### Combat & Inventory
+- **Modular Weapon System** - Support for multiple fire modes (Single, Burst, Full-Auto)
+- **Projectile-Based Combat** - Headshot detection with bonus rewards
+- **Advanced Inventory System** - Drop & pickup mechanics, ammo management
+- **Health & Stamina** - Sprint mechanics with stamina drain/recovery
+
+### AI & Enemies
+- **Zombie AI with Behavior Trees** - Patrol, chase, and attack behaviors
+- **AI Perception System** - Sight-based detection with configurable ranges
+- **Spawn Point System** - Flexible zombie spawning with wave multipliers
+
+### UI & HUD
+- **Complete HUD System** - Health, ammo, interaction prompts, crosshair
+- **In-Game Chat** - Lobby and game chat with command support
+- **Scoreboard** - Kill tracking, headshots, and point system
+- **Spectator Mode** - Watch teammates after death
+
+### Technical
+- **100% C++ Native** - No Blueprint dependencies for core systems
+- **Fully Documented Code** - Extensive comments and documentation
+- **Data-Driven Design** - DataTables for items, characters, and maps
+- **Modular Architecture** - Easy to extend and customize
+
+---
+
+## Getting Started
+
+### Requirements
+- Unreal Engine 5.7
+- Visual Studio 2022 (Windows) or Xcode (macOS)
+- ~2GB disk space
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/DasBander/HordeTemplateV2Native.git
+   ```
+
+2. **Generate project files**
+   - Right-click `HordeTemplateV2Native.uproject`
+   - Select "Generate Visual Studio project files"
+
+3. **Open in Unreal Engine**
+   - Double-click `HordeTemplateV2Native.uproject`
+   - Or open via Epic Games Launcher
+
+4. **Build the project**
+   - Press `Ctrl+Shift+B` in Visual Studio
+   - Or use `Build > Build Solution`
+
+### Quick Start
+
+1. Open the **TestingMap** level (`Content/HordeTemplateBP/Maps/TestingMap`)
+2. Press **Play** to test in editor
+3. For multiplayer testing, use **Play > Advanced Settings > Number of Players**
+
+---
+
+## Project Structure
+
 ```
-    The 5.6 Update is not quite done. ( Pre-release ). It's at least working now.
-
-    - Upgraded to Unreal Engine Version 5.6
-    - Changed the Code Base to fit the new Engine Version
-    - Fixed some Font Issues in the HUD
-    - Fixed HUD Boxes being Rounded Boxes
-    - Fixed Animation Crash because of bad references.
-    - Fixed Inventory not being properly initialized.
-    - Fixed General Inventory Issues
-    - Fixed Issue with Spawning the Character
-    - Changed the SubCharacter to Blueprints ( We don't need for each Character a new C++ Class )
-    - Added some Failsafe Changes.
+HordeTemplateV2Native/
+├── Source/HordeTemplateV2Native/
+│   ├── Public/                    # Header files
+│   │   ├── AI/                    # Zombie AI (Pawn, Controller, Tasks)
+│   │   ├── Animation/             # Animation instance classes
+│   │   ├── Character/             # Player character & spectator
+│   │   ├── FX/                    # Camera shakes & impact effects
+│   │   ├── Gameplay/              # GameMode, GameState, Controllers
+│   │   ├── HUD/                   # HUD & Widget classes
+│   │   ├── Inventory/             # Inventory system
+│   │   ├── Misc/                  # Doors, Trader, Triggers
+│   │   ├── Projectiles/           # Projectile classes
+│   │   └── Weapons/               # Firearm classes
+│   └── Private/                   # Implementation files
+├── Content/HordeTemplateBP/
+│   ├── Maps/                      # Game levels
+│   ├── Blueprint/                 # Character & Widget blueprints
+│   ├── Data/                      # DataTables (Items, Characters, Maps)
+│   └── Assets/                    # Meshes, Materials, Sounds, etc.
+└── Config/                        # Engine & project configuration
 ```
 
+---
 
-# Features
--   C++ Native
--   Designed for 4-Player Coop
--   Advanced Lobby System
--   Chat System
--   Trader
--   World Settings
--   Fully Modular
--   Advanced Inventory System with Drop & Pickup
--   Modular Weapon System with Projectiles
--   Seamless Map Travel
--   Scoreboard
--   Zombie AI
--   Spectator
+## Core Systems
 
-**Code Modules**: Runtime (Horde Template Framework)
-**Number of Particles**: 5
-**Number of Materials**: 53
-**Number of Textures**: 70
-**Number of Sounds**: 70
-**Number of Meshes**: 19
-**Number of Animations**: 25
-**Number of Widgets**: 24
-**Number of Blueprints**: 0
-**Number of C++ Classes**: 60
-**Network Replicated**: Yes
+### Character System (`AHordeBaseCharacter`)
+- Health & damage handling with death/respawn logic
+- Stamina-based sprinting
+- Weapon equipping and firing
+- Interaction system for pickups and traders
+- 3D player name/health display
 
-Supported Development Platforms: Win64, Win32
-Supported Target Build Platforms: Win64, Win32
+### AI System (`AZedPawn` + `AZedAIController`)
+- Behavior Tree-driven AI (`BT_Zed`)
+- Patrol, chase, and attack behaviors
+- Headshot detection for bonus points
+- Configurable sight and chase ranges
 
+### Inventory System (`UInventoryComponent`)
+- Item pickup and dropping
+- Ammo stacking and management
+- Weapon slot system (Primary, Secondary, Healing)
+- DataTable-driven item definitions
 
-# License
+### Game Flow (`AHordeGameMode` + `AHordeGameState`)
+- Lobby state with character selection
+- Wave-based zombie spawning
+- Round progression with pause/trade phases
+- End-game scoring and map rotation
+
+---
+
+## Configuration
+
+### Key Definitions (`HordeTemplateV2Native.h`)
+
+```cpp
+#define GAME_VERSION 2.7
+#define STARTING_MONEY 1500
+#define ZED_SIGHT_RADIUS 1000.f
+#define ZED_LOSE_SIGHT_RADIUS 2500.f
+```
+
+### World Settings
+Configure per-map settings via `AHordeWorldSettings`:
+- Starting items
+- Available characters
+- Match mode (Linear/NonLinear)
+- Round time and max rounds
+- Zombie multiplier
+
+### Input Bindings
+Default controls (configurable in `Config/DefaultInput.ini`):
+- **WASD** - Movement
+- **Space** - Jump
+- **Shift** - Sprint
+- **E** - Interact
+- **Q** - Drop item
+- **R** - Reload
+- **V** - Toggle fire mode
+- **1/2/3** - Weapon slots
+- **Tab** - Scoreboard
+
+---
+
+## Changelog
+
+### Update 2.7 (UE5.7)
+```
+- Upgraded to Unreal Engine 5.7
+- Removed deprecated MagicLeap plugins
+- Fixed crash in GetRandomPlayerSpawn when no spawn points exist
+- Fixed null PlayerState access in RemoveHealth/AddHealth functions
+- Fixed PlayAnimationAllClients ignoring the Montage parameter
+- Fixed reload check comparing against wrong ammo value
+- Fixed PlayerInRange tracking not handling multiple players correctly
+- Updated project version to 2.7.0.0
+```
+
+### Update 2.6 (UE5.6)
+```
+- Upgraded to Unreal Engine 5.6
+- Fixed Font Issues in the HUD
+- Fixed HUD Boxes being Rounded Boxes
+- Fixed Animation Crash from bad references
+- Fixed Inventory not being properly initialized
+- Fixed Character spawning issues
+- Changed SubCharacter to Blueprints
+- Added failsafe changes for stability
+```
+
+---
+
+## Asset Statistics
+
+| Category | Count |
+|----------|-------|
+| C++ Classes | 60 |
+| Widgets | 28 |
+| Materials | 53 |
+| Textures | 70 |
+| Sounds | 70 |
+| Animations | 25 |
+| Meshes | 19 |
+| Particle Systems | 5 |
+
+**Supported Platforms:** Windows (Win64)
+
+---
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues and pull requests.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## License
+
 **MIT License**
+
 ```
-Copyright (c) 2018-2025 - Marc Fraedrich under FinalSpark Gamestudios
+Copyright (c) 2018-2025 Marc Fraedrich under FinalSpark Gamestudios
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -77,14 +266,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
 ```
 
-```
-PS:
-In loving memory Alexander Gregory Morano ( Joviex )
-May 28, 1973 – September 26, 2025
+---
 
-( Voice of the Trader / Tester and helper )
-```
+## Credits
+
+**Author:** Marc Fraedrich ([FinalSpark Gamestudios](https://finalspark-gamestudios.com))
+
+**Special Thanks:**
+- The Unreal Engine community
+- All contributors and testers
+
+---
+
+*In loving memory of Alexander Gregory Morano (Joviex)*
+*May 28, 1973 - September 26, 2025*
+*Voice of the Trader / Tester and helper*
