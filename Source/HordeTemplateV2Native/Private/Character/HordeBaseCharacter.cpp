@@ -23,7 +23,8 @@ void AHordeBaseCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AHordeBaseCharacter, Stamina);
+	// Optimization: Stamina only needed by owner for HUD display
+	DOREPLIFETIME_CONDITION(AHordeBaseCharacter, Stamina, COND_OwnerOnly);
 	DOREPLIFETIME(AHordeBaseCharacter, Health);
 	DOREPLIFETIME(AHordeBaseCharacter, AnimMode);
 	DOREPLIFETIME(AHordeBaseCharacter, IsSprinting);
@@ -388,7 +389,12 @@ void AHordeBaseCharacter::StartInteraction()
 		FInteractionInfo InteractionInfo = IInteractionInterface::Execute_GetInteractionInfo(LastInteractionActor);
 		if (InteractionInfo.AllowedToInteract)
 		{
-			GetHUD()->GetHUDWidget()->IsInteracting = true;
+			// Fixed: Added null checks for HUD and HUDWidget
+			AHordeBaseHUD* HUD = GetHUD();
+			if (HUD && HUD->GetHUDWidget())
+			{
+				HUD->GetHUDWidget()->IsInteracting = true;
+			}
 			IsInteracting = true;
 			TargetInteractionTime = InteractionInfo.InteractionTime;
 			GetWorld()->GetTimerManager().SetTimer(InteractionTimer, this, &AHordeBaseCharacter::ProcessInteraction, .01f, true);
@@ -410,7 +416,12 @@ void AHordeBaseCharacter::StopInteraction()
 		GetWorld()->GetTimerManager().ClearTimer(InteractionTimer);
 	}
 	IsInteracting = false;
-	GetHUD()->GetHUDWidget()->IsInteracting = false;
+	// Fixed: Added null checks for HUD and HUDWidget
+	AHordeBaseHUD* HUD = GetHUD();
+	if (HUD && HUD->GetHUDWidget())
+	{
+		HUD->GetHUDWidget()->IsInteracting = false;
+	}
 	InteractionTime = 0.f;
 	TargetInteractionTime = 0.f;
 	InteractionProgress = 0.f;
@@ -891,14 +902,18 @@ void AHordeBaseCharacter::FinishReload()
 		FItem TempItem = UInventoryHelpers::FindItemByID(FName(*CurrentSelectedFirearm->WeaponID));
 		int32 AmmoIndex;
 		int32 AmmoAmount = Inventory->CountAmmo(TempItem.AmmoType, AmmoIndex);
-		if (AmmoAmount >= (TempItem.MaximumLoadedAmmo - CurrentSelectedFirearm->LoadedAmmo))
+		const int32 AmmoNeeded = TempItem.MaximumLoadedAmmo - CurrentSelectedFirearm->LoadedAmmo;
+		if (AmmoAmount >= AmmoNeeded)
 		{
-			Inventory->RemoveAmmoByType(TempItem.AmmoType, (TempItem.MaximumLoadedAmmo - CurrentSelectedFirearm->LoadedAmmo));
+			// Have enough ammo to fully reload
+			Inventory->RemoveAmmoByType(TempItem.AmmoType, AmmoNeeded);
 			CurrentSelectedFirearm->LoadedAmmo = TempItem.MaximumLoadedAmmo;
 		}
 		else
 		{
-			CurrentSelectedFirearm->LoadedAmmo = AmmoAmount;
+			// Fixed: Add available ammo to current loaded ammo, not replace it
+			// e.g., if player has 5 loaded and 10 in inventory, result should be 15, not 10
+			CurrentSelectedFirearm->LoadedAmmo += AmmoAmount;
 			Inventory->RemoveAmmoByType(TempItem.AmmoType, AmmoAmount);
 		}
 		Reloading = false;

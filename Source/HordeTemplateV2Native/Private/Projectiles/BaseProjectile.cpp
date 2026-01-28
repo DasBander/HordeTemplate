@@ -103,7 +103,9 @@ void ABaseProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const F
 		if (ImpactResult.GetActor() && ImpactResult.GetActor() != GetOwner())
 		{
 			TracerMesh->SetVisibility(false);
-			UGameplayStatics::ApplyPointDamage(ImpactResult.GetActor(), Damage, CollisionSphere->GetComponentLocation(), ImpactResult, nullptr, GetOwner(), nullptr);
+			// Fixed: Pass the owner's InstigatorController for proper kill attribution
+			AController* InstigatorController = GetOwner() ? GetOwner()->GetInstigatorController() : nullptr;
+			UGameplayStatics::ApplyPointDamage(ImpactResult.GetActor(), Damage, CollisionSphere->GetComponentLocation(), ImpactResult, InstigatorController, GetOwner(), nullptr);
 		}
 	}
 

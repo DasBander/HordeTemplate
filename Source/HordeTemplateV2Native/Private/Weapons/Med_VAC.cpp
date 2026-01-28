@@ -103,7 +103,8 @@ void AMed_VAC::StartHealing_Implementation()
 	if (PLY)
 	{
 		UAnimMontage* VACHealAnimation = ObjectFromPath<UAnimMontage>(TEXT("AnimMontage'/Game/HordeTemplateBP/Assets/Animations/AM_VAC_Insert.AM_VAC_Insert'"));
-		if (VACHealAnimation)
+		// Fixed: Added null check for GetAnimInstance()
+		if (VACHealAnimation && PLY->GetMesh() && PLY->GetMesh()->GetAnimInstance())
 		{
 			PLY->GetMesh()->GetAnimInstance()->Montage_Play(VACHealAnimation);
 			FTimerHandle FinishTimer;

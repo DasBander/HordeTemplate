@@ -14,7 +14,7 @@
 		- On Widget Blueprints or Blueprints don't forget the _C to get the Compiled Asset Reference. 
 */
 //General
-#define GAME_VERSION 2.7
+#define GAME_VERSION 2.71
 
 //Economy
 #define STARTING_MONEY 1500

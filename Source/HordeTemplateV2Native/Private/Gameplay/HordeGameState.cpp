@@ -87,10 +87,11 @@ void AHordeGameState::BeginPlay()
 					APlayerController* PC = Cast<APlayerController>(GI->GetPrimaryPlayerController());
 					if (PC)
 					{
-						if (PC->PlayerState)
-						{
-							LobbyInformation.OwnerID = PC->PlayerState->GetUniqueId()->ToString();
-						}
+						// Fixed: Added null check for GetUniqueId()
+					if (PC->PlayerState && PC->PlayerState->GetUniqueId().IsValid())
+					{
+						LobbyInformation.OwnerID = PC->PlayerState->GetUniqueId()->ToString();
+					}
 					}
 					LobbyInformation.LobbyName = GI->LobbyName;
 					LobbyInformation.LobbyMapRotation = GI->MapRotation;
@@ -457,12 +458,14 @@ void AHordeGameState::ProcessLobbyTime()
  */
 void AHordeGameState::ResetLobbyTime()
 {
-	if (GetWorld()->GetTimerManager().IsTimerActive(LobbyTimer))
+	// Fixed: Only send "interrupted" message if the timer was actually active (game was starting)
+	const bool bWasTimerActive = GetWorld()->GetTimerManager().IsTimerActive(LobbyTimer);
+	if (bWasTimerActive)
 	{
 		GetWorld()->GetTimerManager().ClearTimer(LobbyTimer);
+		PopMessage(FHordeChatMessage("Game Start was interrupted."));
 	}
 	LobbyTime = LobbyInformation.DefaultLobbyTime;
-	PopMessage(FHordeChatMessage("Game Start was interrupted."));
 	BlockDisconnect = false;
 }
 
@@ -576,7 +579,8 @@ AHordePlayerState* AHordeGameState::GetPlayerStateByID(FString PlayerID)
 	for (auto& PLY : PlayerArray)
 	{
 		AHordePlayerState* PS = Cast<AHordePlayerState>(PLY);
-		if (PS)
+		// Fixed: Added null check for GetUniqueId()
+		if (PS && PS->GetUniqueId().IsValid())
 		{
 			if (PS->GetUniqueId()->ToString() == PlayerID)
 			{
@@ -618,7 +622,8 @@ void AHordeGameState::FreeupUnassignedCharacters()
 			PopMessage(FHordeChatMessage(LocalCharacters[PlyID].PlayerUsername + " has disconnected"));
 
 			//Abort Character Trade if Player was involved.
-			if (IsTradeInProgress && TradeProgress.Instigator == LocalCharacters[PlyID].PlayerID || TradeProgress.Target == LocalCharacters[PlyID].PlayerID)
+			// Fixed: Added parentheses for correct operator precedence (&&  has higher precedence than ||)
+			if (IsTradeInProgress && (TradeProgress.Instigator == LocalCharacters[PlyID].PlayerID || TradeProgress.Target == LocalCharacters[PlyID].PlayerID))
 			{
 				AbortLobbyTrade();
 			}
@@ -655,7 +660,8 @@ FString AHordeGameState::GetUsernameBySteamID(FString ID, bool &FoundPlayer)
 	for (auto& PS : PlayerArray)
 	{
 		AHordePlayerState* PlayerST = Cast<AHordePlayerState>(PS);
-		if (PlayerST)
+		// Fixed: Added null check for GetUniqueId()
+		if (PlayerST && PlayerST->GetUniqueId().IsValid())
 		{
 			if (PlayerST->GetUniqueId()->ToString() == ID)
 			{
@@ -1052,17 +1058,27 @@ void AHordeGameState::ProcessCharacterTrade()
 
 /**
  *	Accepts Character Trade and Swaps Characters of Instigator and Target Player. After all that it updates the lobby.
+ *	Fixed: Added bounds checking for character indices before array access.
  *
  * @param
  * @return void
  */
 void AHordeGameState::AcceptCharacterTrade()
 {
-	
+
 	int32 TargetCharacterIndex = -1;
 	int32 InstigatorCharacterIndex = -1;
 	FName TargetCharacter = GetCharacterByID(TradeProgress.Target, TargetCharacterIndex);
 	FName InstigatorCharacter = GetCharacterByID(TradeProgress.Instigator, InstigatorCharacterIndex);
+
+	// Fixed: Check that both indices are valid before proceeding with the trade
+	if (!LobbyInformation.AvailableCharacters.IsValidIndex(InstigatorCharacterIndex) ||
+		!LobbyInformation.AvailableCharacters.IsValidIndex(TargetCharacterIndex))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AcceptCharacterTrade: Invalid character indices (Instigator: %d, Target: %d). Aborting trade."), InstigatorCharacterIndex, TargetCharacterIndex);
+		AbortLobbyTrade();
+		return;
+	}
 
 	AHordePlayerState* TargetPlayerState = GetPlayerStateByID(TradeProgress.Target);
 	if (TargetPlayerState)

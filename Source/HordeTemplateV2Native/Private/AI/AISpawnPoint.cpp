@@ -48,6 +48,7 @@ AAISpawnPoint::AAISpawnPoint()
 /**
  *	Overlap with Spawn Collision.
  *	If Character is inside this Collision Spawn wont be free.
+ *	Fixed: Use counter to track multiple characters overlapping.
  *
  * @param The Overlapping Component, Actor, Other Component, Other Body Index, FromSweep and the HitResult.
  * @return void
@@ -59,6 +60,7 @@ void AAISpawnPoint::CharacterOverlap(UPrimitiveComponent* OverlappedComponent, A
 		ACharacter* PLY = Cast<ACharacter>(OtherActor);
 		if (PLY)
 		{
+			CharactersInSpawnCount++;
 			SpawnNotFree = true;
 		}
 	}
@@ -68,6 +70,7 @@ void AAISpawnPoint::CharacterOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 /**
  * If Character leaves free up the Spawn.
+ * Fixed: Use counter to properly handle multiple characters - only free spawn when all leave.
  *
  * @param The Overlapping Component, Other Actor, Other Component and Other Body Index
  * @return void
@@ -79,7 +82,11 @@ void AAISpawnPoint::CharacterEndOverlap(UPrimitiveComponent* OverlappedComponent
 		ACharacter* PLY = Cast<ACharacter>(OtherActor);
 		if (PLY)
 		{
-			SpawnNotFree = false;
+			CharactersInSpawnCount = FMath::Max(0, CharactersInSpawnCount - 1);
+			if (CharactersInSpawnCount == 0)
+			{
+				SpawnNotFree = false;
+			}
 		}
 	}
 }

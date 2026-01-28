@@ -40,12 +40,12 @@ AZedAIController::AZedAIController()
 void AZedAIController::EnemyInSight(AActor* Actor, FAIStimulus Stimulus)
 {
 	AHordeBaseCharacter* Enemy = Cast<AHordeBaseCharacter>(Actor);
-	if (Enemy)
+	if (Enemy && !Enemy->GetIsDead())
 	{
-		if (GetWorld()->GetTimerManager().IsTimerActive(SightClearTimer))
-		{
-			GetWorld()->GetTimerManager().SetTimer(SightClearTimer, this, &AZedAIController::ClearSight, FMath::FRandRange(ZED_LOSE_SIGHT_TIME_MIN, ZED_LOSE_SIGHT_TIME_MAX), false);
-		}
+		// Fixed: Always set/reset the sight clear timer when enemy is detected, not only when already active
+		// The previous logic only reset the timer if it was already running, meaning it wouldn't set the timer on first sight
+		GetWorld()->GetTimerManager().SetTimer(SightClearTimer, this, &AZedAIController::ClearSight, FMath::FRandRange(ZED_LOSE_SIGHT_TIME_MIN, ZED_LOSE_SIGHT_TIME_MAX), false);
+
 		UBlackboardComponent* BB = GetBlackboardComponent();
 		if (BB)
 		{

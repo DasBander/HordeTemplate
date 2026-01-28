@@ -44,9 +44,10 @@ void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 			if (PlayerLobbyWidget)
 			{
 				PlayerLobbyWidget->AddToViewport();
-				FInputModeGameAndUI* PlyInput = new FInputModeGameAndUI();
-				PlyInput->SetWidgetToFocus(PlayerLobbyWidget->TakeWidget());
-				GetOwningPlayerController()->SetInputMode(*PlyInput);
+				// Fixed: Use stack allocation instead of heap to avoid memory leak
+				FInputModeGameAndUI InputMode;
+				InputMode.SetWidgetToFocus(PlayerLobbyWidget->TakeWidget());
+				GetOwningPlayerController()->SetInputMode(InputMode);
 				GetOwningPlayerController()->bShowMouseCursor = true;
 			}
 			break;
@@ -63,9 +64,13 @@ void AHordeBaseHUD::GameStatusChanged(uint8 GameStatus)
 		}
 		case EGameStatus::ESERVERTRAVEL:
 		{
-			PlayerTravelWidget->AddToViewport();
-			GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
-			GetOwningPlayerController()->bShowMouseCursor = false;
+			// Fixed: Added null check for PlayerTravelWidget
+			if (PlayerTravelWidget)
+			{
+				PlayerTravelWidget->AddToViewport();
+				GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
+				GetOwningPlayerController()->bShowMouseCursor = false;
+			}
 			break;
 		}
 		default:
@@ -199,7 +204,8 @@ void AHordeBaseHUD::CloseEscapeMenu()
  */
 void AHordeBaseHUD::ToggleScoreboard()
 {
-	if (!IsInChat && !bIsTraderUIOpen && CurrentGameStatus == EGameStatus::EINGAME)
+	// Fixed: Added null check for PlayerScoreboardWidget
+	if (!IsInChat && !bIsTraderUIOpen && CurrentGameStatus == EGameStatus::EINGAME && PlayerScoreboardWidget)
 	{
 		if (!bIsScoreboardOpen)
 		{
@@ -227,7 +233,8 @@ void AHordeBaseHUD::ToggleScoreboard()
  */
 void AHordeBaseHUD::OpenEscapeMenu()
 {
-	if (!bIsScoreboardOpen && CurrentGameStatus != EGameStatus::ELOBBY)
+	// Fixed: Added null check for PlayerEscapeWidget
+	if (!bIsScoreboardOpen && CurrentGameStatus != EGameStatus::ELOBBY && PlayerEscapeWidget)
 	{
 		if (IsInChat)
 		{
@@ -242,9 +249,10 @@ void AHordeBaseHUD::OpenEscapeMenu()
 		}
 
 		PlayerEscapeWidget->AddToViewport(9999);
-		FInputModeUIOnly* InputMode = new FInputModeUIOnly();
-		InputMode->SetWidgetToFocus(PlayerEscapeWidget->TakeWidget());
-		GetOwningPlayerController()->SetInputMode(*InputMode);
+		// Fixed: Use stack allocation instead of heap to avoid memory leak
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(PlayerEscapeWidget->TakeWidget());
+		GetOwningPlayerController()->SetInputMode(InputMode);
 		GetOwningPlayerController()->bShowMouseCursor = true;
 	}
 }
@@ -257,12 +265,14 @@ void AHordeBaseHUD::OpenEscapeMenu()
  */
 void AHordeBaseHUD::OpenTraderUI()
 {
-	if (!IsInChat && !bIsScoreboardOpen && CurrentGameStatus == EGameStatus::EINGAME && !bIsTraderUIOpen)
+	// Fixed: Added null check for PlayerTraderWidget
+	if (!IsInChat && !bIsScoreboardOpen && CurrentGameStatus == EGameStatus::EINGAME && !bIsTraderUIOpen && PlayerTraderWidget)
 	{
 		PlayerTraderWidget->AddToViewport(9999);
-		FInputModeUIOnly* InputMode = new FInputModeUIOnly();
-		InputMode->SetWidgetToFocus(PlayerTraderWidget->TakeWidget());
-		GetOwningPlayerController()->SetInputMode(*InputMode);
+		// Fixed: Use stack allocation instead of heap to avoid memory leak
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(PlayerTraderWidget->TakeWidget());
+		GetOwningPlayerController()->SetInputMode(InputMode);
 		GetOwningPlayerController()->bShowMouseCursor = true;
 		bIsTraderUIOpen = true;
 	}
@@ -383,19 +393,42 @@ void AHordeBaseHUD::DrawHUD()
  */
 void AHordeBaseHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	PlayerHUDWidget->ReleaseSlateResources(true);
-	PlayerLobbyWidget->ReleaseSlateResources(true);
-	PlayerTraderWidget->ReleaseSlateResources(true);
-	PlayerEndScreenWidget->ReleaseSlateResources(true);
-	PlayerTravelWidget->ReleaseSlateResources(true);
-	PlayerScoreboardWidget->ReleaseSlateResources(true);
-
-	PlayerScoreboardWidget = nullptr;
-	PlayerHUDWidget        = nullptr;
-	PlayerLobbyWidget      = nullptr;
-	PlayerTraderWidget     = nullptr;
-	PlayerEndScreenWidget  = nullptr;
-	PlayerTravelWidget     = nullptr;
+	// Fixed: Added null checks before calling ReleaseSlateResources to prevent crashes
+	if (PlayerHUDWidget)
+	{
+		PlayerHUDWidget->ReleaseSlateResources(true);
+		PlayerHUDWidget = nullptr;
+	}
+	if (PlayerLobbyWidget)
+	{
+		PlayerLobbyWidget->ReleaseSlateResources(true);
+		PlayerLobbyWidget = nullptr;
+	}
+	if (PlayerTraderWidget)
+	{
+		PlayerTraderWidget->ReleaseSlateResources(true);
+		PlayerTraderWidget = nullptr;
+	}
+	if (PlayerEndScreenWidget)
+	{
+		PlayerEndScreenWidget->ReleaseSlateResources(true);
+		PlayerEndScreenWidget = nullptr;
+	}
+	if (PlayerTravelWidget)
+	{
+		PlayerTravelWidget->ReleaseSlateResources(true);
+		PlayerTravelWidget = nullptr;
+	}
+	if (PlayerScoreboardWidget)
+	{
+		PlayerScoreboardWidget->ReleaseSlateResources(true);
+		PlayerScoreboardWidget = nullptr;
+	}
+	if (PlayerEscapeWidget)
+	{
+		PlayerEscapeWidget->ReleaseSlateResources(true);
+		PlayerEscapeWidget = nullptr;
+	}
 
 	Super::EndPlay(EndPlayReason);
 }

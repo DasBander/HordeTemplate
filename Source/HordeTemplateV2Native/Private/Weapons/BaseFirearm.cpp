@@ -53,10 +53,18 @@ void ABaseFirearm::FireFirearm()
 {
 	if (LoadedAmmo > 0)
 	{
+		FItem CurrentWeaponItem = UInventoryHelpers::FindItemByID(FName(*WeaponID));
+
+		// Fixed: Check if ProjectileClass is valid before spawning
+		if (!CurrentWeaponItem.ProjectileClass)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("FireFirearm: ProjectileClass is null for weapon %s"), *WeaponID);
+			return;
+		}
+
 		PlayFirearmFX();
 		LoadedAmmo = FMath::Clamp<int32>((LoadedAmmo - 1), 0, 9999);
 
-		FItem CurrentWeaponItem = UInventoryHelpers::FindItemByID(FName(*WeaponID));
 		FTransform SpawnTransform;
 		FVector EyeViewPoint;
 		FRotator EyeRotation;
@@ -98,10 +106,11 @@ void ABaseFirearm::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ABaseFirearm, LoadedAmmo);
+	// Optimization: Ammo count and fire mode only needed by owner for HUD display
+	DOREPLIFETIME_CONDITION(ABaseFirearm, LoadedAmmo, COND_OwnerOnly);
 	DOREPLIFETIME(ABaseFirearm, WeaponID);
 	DOREPLIFETIME(ABaseFirearm, ProjectileFromMuzzle);
-	DOREPLIFETIME(ABaseFirearm, FireMode);
+	DOREPLIFETIME_CONDITION(ABaseFirearm, FireMode, COND_OwnerOnly);
 }
 
 /** ( Multicast )

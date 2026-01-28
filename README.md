@@ -1,4 +1,4 @@
-# Horde Template V2 (Native) - v2.7
+# Horde Template V2 (Native) - v2.7.1
 
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.7-blue)](https://www.unrealengine.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -10,7 +10,7 @@ A fully-featured, open-source **C++ framework** for creating 4-player cooperativ
 
 Originally a premium Unreal Marketplace asset, now released to the community for free under the MIT License.
 
-**[Marketplace Page](https://www.unrealengine.com/marketplace/en-US/product/horde-template-v2-native-horde-template-framework)** | **[Documentation](https://bugs.finalspark.io/docs/horde-template-native)** | **[Report Issues](https://github.com/DasBander/HordeTemplateV2Native/issues)**
+**[Marketplace Page](https://www.unrealengine.com/marketplace/en-US/product/horde-template-v2-native-horde-template-framework)** | **[Documentation](https://docs.google.com/document/d/1iBH7lUJbGce0pt5V6JpFJs_xdPA5Gh6os2kZ5imvwf8/edit?tab=t.0#heading=h.5x0d5h95i329)** | **[Report Issues](https://github.com/DasBander/HordeTemplateV2Native/issues)**
 
 ---
 
@@ -187,16 +187,63 @@ Default controls (configurable in `Config/DefaultInput.ini`):
 
 ## Changelog
 
-### Update 2.7 (UE5.7)
+### Update 2.7.1
 ```
+AI System Fixes:
+- Fixed ZedPawn OnCharacterOutRange decrementing counter for dead players (mismatched with OnCharacterInRange)
+- Fixed AISpawnPoint not tracking multiple characters correctly (same counter bug pattern)
+
+Lobby & Trade Fixes:
+- Fixed AcceptCharacterTrade crash when character indices are invalid (missing bounds check)
+- Fixed multiple GetUniqueId() calls without null checks (HordeGameState, HordePlayerState)
+- Fixed GetControllerByID crash when PlayerState is null
+
+Weapon & Medical Fixes:
+- Fixed Med_VAC StartHealing crash when AnimInstance is null
+
+Replication Optimizations:
+- Optimized Stamina replication to owner-only (reduces bandwidth)
+- Optimized InventoryComponent ActiveItemIndex/AvailableAmmo to owner-only
+- Optimized BaseFirearm LoadedAmmo/FireMode to owner-only
+```
+
+### Update 2.7.0 (UE5.7)
+```
+Engine & Configuration:
 - Upgraded to Unreal Engine 5.7
 - Removed deprecated MagicLeap plugins
+- Updated project version to 2.7.0.0
+
+Character System Fixes:
 - Fixed crash in GetRandomPlayerSpawn when no spawn points exist
 - Fixed null PlayerState access in RemoveHealth/AddHealth functions
 - Fixed PlayAnimationAllClients ignoring the Montage parameter
-- Fixed reload check comparing against wrong ammo value
-- Fixed PlayerInRange tracking not handling multiple players correctly
-- Updated project version to 2.7.0.0
+- Fixed reload check comparing wrong ammo value (DefaultLoadedAmmo vs MaximumLoadedAmmo)
+- Fixed FinishReload partial ammo bug (was replacing instead of adding to loaded ammo)
+- Fixed null checks for GetHUD/GetHUDWidget in StartInteraction/StopInteraction
+
+AI System Fixes:
+- Fixed PlayerInRange tracking not handling multiple players correctly (added counter)
+- Fixed ZedAIController sight timer logic (was only resetting if already active)
+- Added dead player check when AI detects enemies
+
+Inventory & Economy Fixes:
+- Fixed BuyItem affordability check logic error (always evaluated to true)
+- Fixed projectile damage not crediting kills to shooter (missing InstigatorController)
+
+Weapon System Fixes:
+- Fixed crash when firing weapon with null ProjectileClass
+
+Lobby System Fixes:
+- Fixed operator precedence bug in FreeupUnassignedCharacters (trade abort logic)
+- Fixed ResetLobbyTime sending "interrupted" message when timer wasn't active
+- Added mid-game player join handling (spawns as spectator instead of being stuck)
+
+UI/HUD Fixes:
+- Fixed memory leaks from heap-allocated FInputMode objects (3 instances)
+- Fixed null checks for PlayerTravelWidget, PlayerScoreboardWidget, PlayerEscapeWidget, PlayerTraderWidget
+- Fixed null check in UpdateLobbyPlayerList for LobbyWidget
+- Fixed EndPlay crash from null widget pointers (added cleanup for PlayerEscapeWidget)
 ```
 
 ### Update 2.6 (UE5.6)

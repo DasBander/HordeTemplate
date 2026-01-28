@@ -151,7 +151,8 @@ APlayerController* AHordeGameMode::GetControllerByID(FString PlayerID)
 	for (TActorIterator<APlayerController> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		APlayerController* APC = *ActorItr;
-		if (APC)
+		// Fixed: Added null check for PlayerState before accessing GetUniqueId
+		if (APC && APC->PlayerState && APC->PlayerState->GetUniqueId().IsValid())
 		{
 			if (APC->PlayerState->GetUniqueId()->ToString() == PlayerID)
 			{

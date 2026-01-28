@@ -87,7 +87,12 @@ void AHordePlayerState::UpdateLobbyPlayerList_Implementation(const TArray<FPlaye
 		AHordeBaseHUD* HUD = Cast<AHordeBaseHUD>(PC->GetHUD());
 		if (HUD)
 		{
-			HUD->GetLobbyWidget()->OnLobbyPlayersUpdateDelegate.Broadcast(Players);
+			// Fixed: Added null check for LobbyWidget before accessing delegate
+			UPlayerLobbyWidget* LobbyWidget = HUD->GetLobbyWidget();
+			if (LobbyWidget)
+			{
+				LobbyWidget->OnLobbyPlayersUpdateDelegate.Broadcast(Players);
+			}
 		}
 	}
 }
@@ -302,7 +307,8 @@ void AHordePlayerState::BuyItem_Implementation(FName SellItemID)
 
 	if (TraderSellData) {
 		FTraderSellItem* ItemFromRow = TraderSellData->FindRow<FTraderSellItem>(SellItemID, "PlayerState - Buy Item", false);
-		if (ItemFromRow && PlayerMoney >= PlayerMoney - ItemFromRow->ItemPrice)
+		// Fixed: Was comparing PlayerMoney >= PlayerMoney - ItemPrice (always true). Should check if player can afford item.
+		if (ItemFromRow && PlayerMoney >= ItemFromRow->ItemPrice)
 		{
 			PlayerMoney = FMath::Clamp<int32>(PlayerMoney - ItemFromRow->ItemPrice, 0, MAX_int32);
 			AHordeBaseController* PC = Cast<AHordeBaseController>(GetOwner());
@@ -374,6 +380,7 @@ void AHordePlayerState::ClientNotifyPoints_Implementation(EPointType PointType, 
 
 /** ( Virtual; Overridden )
  *	Updates Game Status takes a free player and updates lobby.
+ *	Fixed: Now handles mid-game joins by spawning player as spectator.
  *
  * @param
  * @return void
@@ -393,13 +400,37 @@ void AHordePlayerState::BeginPlay()
 			{
 				ClientUpdateGameStatus(GS->GameStatus);
 				Player.SelectedCharacter = GS->GetFreeCharacter();
-				Player.PlayerID = GetUniqueId()->ToString();
+				// Fixed: Added null check for GetUniqueId()
+				Player.PlayerID = GetUniqueId().IsValid() ? GetUniqueId()->ToString() : TEXT("");
 				Player.UserName = GetPlayerName();
 
-				GS->TakePlayer(Player);
-				GS->UpdatePlayerLobby();
-				GS->PopMessage(FHordeChatMessage("SERVER", FText::FromString(GetPlayerName() + " has joined.")));
-
+				// Fixed: Handle mid-game joins - spawn as spectator if game is already in progress
+				if (GS->GameStatus == EGameStatus::EINGAME)
+				{
+					// Player joined mid-game, spawn them as spectator
+					APlayerController* PC = Cast<APlayerController>(GetOwner());
+					if (PC)
+					{
+						AHordeGameMode* GM = Cast<AHordeGameMode>(GetWorld()->GetAuthGameMode());
+						if (GM)
+						{
+							GM->SpawnSpectator(PC);
+							bIsDead = true; // Mark as dead so they spectate
+						}
+					}
+					GS->PopMessage(FHordeChatMessage("SERVER", FText::FromString(GetPlayerName() + " joined as spectator.")));
+				}
+				else if (GS->GameStatus == EGameStatus::ELOBBY)
+				{
+					GS->TakePlayer(Player);
+					GS->UpdatePlayerLobby();
+					GS->PopMessage(FHordeChatMessage("SERVER", FText::FromString(GetPlayerName() + " has joined.")));
+				}
+				else
+				{
+					// Game over or server travel - just notify
+					GS->PopMessage(FHordeChatMessage("SERVER", FText::FromString(GetPlayerName() + " has joined.")));
+				}
 			}
 		}
 	});

@@ -275,6 +275,7 @@ void AZedPawn::OnCharacterInRange(UPrimitiveComponent* OverlappedComponent, AAct
 /** ( Bound to Delegate )
  *	Resets BlackboardKey "PlayerInRange" if all Horde Characters stepped out of collision.
  *	Only sets PlayerInRange to false when no players remain in range.
+ *	Fixed: Only decrement counter for alive characters (matching OnCharacterInRange logic)
  *
  * @param UPrimitiveComponent ( Overlapping Component ), AActor ( Other Actor ), UPrimitiveComponent ( Other Component ), int32 ( Other Body Index )
  * @return void
@@ -282,7 +283,9 @@ void AZedPawn::OnCharacterInRange(UPrimitiveComponent* OverlappedComponent, AAct
 void AZedPawn::OnCharacterOutRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	AHordeBaseCharacter* Char = Cast<AHordeBaseCharacter>(OtherActor);
-	if (Char)
+	// Fixed: Only decrement if the character is alive (matching the check in OnCharacterInRange)
+	// Dead characters were never counted, so we shouldn't decrement for them
+	if (Char && !Char->GetIsDead())
 	{
 		PlayersInRangeCount = FMath::Max(0, PlayersInRangeCount - 1);
 		if (PlayersInRangeCount == 0)

@@ -26,8 +26,9 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UInventoryComponent, ActiveItemIndex);
-	DOREPLIFETIME(UInventoryComponent, AvailableAmmoForCurrentWeapon);
+	// Optimization: These values only needed by owner for HUD display
+	DOREPLIFETIME_CONDITION(UInventoryComponent, ActiveItemIndex, COND_OwnerOnly);
+	DOREPLIFETIME_CONDITION(UInventoryComponent, AvailableAmmoForCurrentWeapon, COND_OwnerOnly);
 }
 
 const TArray<FItem>& UInventoryComponent::GetInventory()
