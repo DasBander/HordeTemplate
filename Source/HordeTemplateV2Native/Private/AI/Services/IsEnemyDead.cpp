@@ -5,12 +5,13 @@
 #include "AI/ZedPawn.h"
 #include "AI/ZedAIController.h"
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
+#include "HordeTemplateV2Native.h"
 
 /**
  * Constructor
  *
- * @param 
- * @return 
+ * @param
+ * @return
  */
 UIsEnemyDead::UIsEnemyDead()
 {
@@ -22,6 +23,7 @@ UIsEnemyDead::UIsEnemyDead()
 
 /**
  * Tick Node which checks if Enemy is Dead ( Player Character ). If zombie killed player he ignores him.
+ * Also handles state-based speed management and LOS tracking.
  *
  * @param Owner Behavior Tree Component the node memory and delta seconds
  * @return void
@@ -31,27 +33,91 @@ void UIsEnemyDead::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
 	UBlackboardComponent* BBC = Cast<UBlackboardComponent>(OwnerComp.GetBlackboardComponent());
-	// Fixed: Added null check for GetAIOwner() before accessing GetPawn() or SetFocus()
 	AAIController* AIOwner = OwnerComp.GetAIOwner();
-	if (BBC && AIOwner)
+	if (!BBC || !AIOwner)
 	{
-		AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(BBC->GetValueAsObject("Enemy"));
-		AZedPawn* Zed = Cast<AZedPawn>(AIOwner->GetPawn());
-		if (PLY && PLY->GetIsDead())
+		return;
+	}
+
+	AZedAIController* ZedController = Cast<AZedAIController>(AIOwner);
+	AZedPawn* Zed = Cast<AZedPawn>(AIOwner->GetPawn());
+	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(BBC->GetValueAsObject("Enemy"));
+
+	if (!Zed)
+	{
+		return;
+	}
+
+	// Check if enemy is dead
+	if (PLY && PLY->GetIsDead())
+	{
+		BBC->SetValueAsObject("Enemy", nullptr);
+		AIOwner->SetFocus(nullptr);
+
+		if (ZedController)
 		{
-			BBC->SetValueAsObject("Enemy", nullptr);
-			if (Zed && Zed->GetCharacterMovement()->MaxWalkSpeed != 200.f)
+			// Check if we have a last known location to investigate
+			if (ZedController->HasLastKnownEnemyLocation())
 			{
-				Zed->ModifyWalkSpeed(200.f);
+				ZedController->SetAIState(EZedAIState::Alert);
 			}
-			AIOwner->SetFocus(nullptr);
+			else
+			{
+				ZedController->SetAIState(EZedAIState::Patrol);
+			}
 		}
-		else if(PLY && !PLY->GetIsDead())
+		return;
+	}
+
+	// Handle active enemy - update state based on presence
+	if (PLY && !PLY->GetIsDead() && ZedController)
+	{
+		EZedAIState CurrentState = ZedController->GetAIState();
+
+		// Update last known location while we have an enemy
+		ZedController->SetLastKnownEnemyLocation(PLY->GetActorLocation());
+
+		// If not already chasing/attacking/staggered, transition to chase
+		if (CurrentState == EZedAIState::Patrol || CurrentState == EZedAIState::Alert || CurrentState == EZedAIState::Idle)
 		{
-			if (Zed && Zed->GetCharacterMovement()->MaxWalkSpeed != 500.f)
+			ZedController->SetAIState(EZedAIState::Chase);
+		}
+
+		// Check line of sight during chase
+		if (CurrentState == EZedAIState::Chase)
+		{
+			if (!ZedController->HasLineOfSightToEnemy())
 			{
-				Zed->ModifyWalkSpeed(500.f);
+				// LOS lost - check if we've lost it for too long
+				if (ZedController->GetTimeSinceLostLOS() >= ZED_LOS_LOST_THRESHOLD)
+				{
+					// Transition to alert state, clear enemy, investigate last known location
+					BBC->SetValueAsObject("Enemy", nullptr);
+					AIOwner->SetFocus(nullptr);
+					ZedController->SetAIState(EZedAIState::Alert);
+				}
 			}
+		}
+	}
+
+	// No enemy - ensure we're in patrol or alert state
+	if (!PLY && ZedController)
+	{
+		EZedAIState CurrentState = ZedController->GetAIState();
+
+		if (CurrentState == EZedAIState::Chase)
+		{
+			// We were chasing but lost target - investigate
+			if (ZedController->HasLastKnownEnemyLocation())
+			{
+				ZedController->SetAIState(EZedAIState::Alert);
+			}
+			else
+			{
+				ZedController->SetAIState(EZedAIState::Patrol);
+			}
+
+			AIOwner->SetFocus(nullptr);
 		}
 	}
 }

@@ -23,8 +23,9 @@
  */
 AZedPawn::AZedPawn()
 {
-	PrimaryActorTick.bStartWithTickEnabled = false;
-	PrimaryActorTick.bCanEverTick = false;
+	// Enable tick for smooth speed interpolation
+	PrimaryActorTick.bStartWithTickEnabled = true;
+	PrimaryActorTick.bCanEverTick = true;
 	SetReplicates(true);
 
 	const ConstructorHelpers::FObjectFinder<USkeletalMesh> PlayerMeshAsset(TEXT("SkeletalMesh'/Game/HordeTemplateBP/Assets/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
@@ -34,7 +35,7 @@ AZedPawn::AZedPawn()
 		GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f).Quaternion());
 		GetMesh()->SetCollisionProfileName(FName(TEXT("Zed")));
 	}
-	
+
 	// static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("/Game/HordeTemplateBP/Assets/Animations/Zombie/ABP_Zombie"));
 	// if (AnimBP.Succeeded() && GetMesh())
 	// {
@@ -59,6 +60,12 @@ AZedPawn::AZedPawn()
 	{
 		ZedIdleSound->SetSound(ZedIdleSoundAsset.Object);
 	}
+
+	// Chase breathing audio component
+	ZedChaseBreathing = CreateDefaultSubobject<UAudioComponent>(TEXT("Zed Chase Breathing"));
+	ZedChaseBreathing->SetupAttachment(RootComponent);
+	ZedChaseBreathing->bAutoActivate = false;
+
 	PlayerRangeCollision = CreateDefaultSubobject<USphereComponent>(TEXT("Player Collision Sphere"));
 	PlayerRangeCollision->SetupAttachment(RootComponent);
 	PlayerRangeCollision->SetRelativeLocation(FVector(74.f, 0.f, 0.f));
@@ -70,9 +77,10 @@ AZedPawn::AZedPawn()
 	PlayerRangeCollision->OnComponentBeginOverlap.AddDynamic(this, &AZedPawn::OnCharacterInRange);
 	PlayerRangeCollision->OnComponentEndOverlap.AddDynamic(this, &AZedPawn::OnCharacterOutRange);
 
-
-	GetCharacterMovement()->MaxWalkSpeed = 200.f;
-
+	// Initialize speed values
+	GetCharacterMovement()->MaxWalkSpeed = ZED_SPEED_PATROL;
+	CurrentWalkSpeed = ZED_SPEED_PATROL;
+	TargetWalkSpeed = ZED_SPEED_PATROL;
 }
 
 
@@ -88,6 +96,8 @@ void AZedPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 
 	DOREPLIFETIME(AZedPawn, Health);
 	DOREPLIFETIME(AZedPawn, IsDead);
+	DOREPLIFETIME(AZedPawn, TargetWalkSpeed);
+	DOREPLIFETIME(AZedPawn, BaseSpeedMultiplier);
 	// Optimization: PatrolTag is only used server-side for AI behavior, no need to replicate
 	// DOREPLIFETIME(AZedPawn, PatrolTag);
 }
@@ -102,7 +112,16 @@ void AZedPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 void AZedPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	// Set random speed multiplier on server (will replicate to clients)
+	if (HasAuthority())
+	{
+		BaseSpeedMultiplier = FMath::FRandRange(ZED_SPEED_MULTIPLIER_MIN, ZED_SPEED_MULTIPLIER_MAX);
+
+		// Set random attack cooldown
+		AttackCooldownDuration = FMath::FRandRange(ZED_ATTACK_COOLDOWN_MIN, ZED_ATTACK_COOLDOWN_MAX);
+	}
+
 	FTimerHandle DelayedBeginPlayHandle;
 	FTimerDelegate DelayedBeginPlayDelegate;
 
@@ -120,6 +139,21 @@ void AZedPawn::BeginPlay()
 	});
 
 	GetWorld()->GetTimerManager().SetTimer(DelayedBeginPlayHandle, DelayedBeginPlayDelegate, 1.f, false);
+}
+
+
+/**
+ *	Tick - Updates smooth speed interpolation.
+ *
+ * @param DeltaTime - Frame delta time
+ * @return void
+ */
+void AZedPawn::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Update speed interpolation
+	UpdateWalkSpeedInterpolation(DeltaTime);
 }
 
 
@@ -197,15 +231,20 @@ float AZedPawn::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent,
 							KillAI(PLY, EPointType::EPointCasual);
 						}
 					}
+					else
+					{
+						// Process hit reaction for non-lethal damage
+						ProcessHitReaction();
+					}
 				}
 			}
 			else {
 				UE_LOG(LogTemp, Error, TEXT("ZedPawn: Point Damage BoneName == NAME_None! There might be a collision in the way."));
 			}
-			
+
 		}
 	}
-	
+
 	return Health;
 }
 
@@ -411,5 +450,204 @@ void AZedPawn::ModifyWalkSpeed_Implementation(float MaxWalkSpeed)
 bool AZedPawn::ModifyWalkSpeed_Validate(float MaxWalkSpeed)
 {
 	return true;
+}
+
+
+/**
+ *	Sets the target walk speed for smooth interpolation.
+ *
+ * @param NewTargetSpeed - Target speed to interpolate towards
+ * @return void
+ */
+void AZedPawn::SetTargetWalkSpeed(float NewTargetSpeed)
+{
+	// Apply base speed multiplier
+	TargetWalkSpeed = NewTargetSpeed * BaseSpeedMultiplier;
+}
+
+
+/**
+ *	Updates walk speed interpolation each frame.
+ *
+ * @param DeltaTime - Frame delta time
+ * @return void
+ */
+void AZedPawn::UpdateWalkSpeedInterpolation(float DeltaTime)
+{
+	if (FMath::IsNearlyEqual(CurrentWalkSpeed, TargetWalkSpeed, 1.f))
+	{
+		CurrentWalkSpeed = TargetWalkSpeed;
+		return;
+	}
+
+	// Determine acceleration/deceleration rate
+	float InterpSpeed;
+	if (CurrentWalkSpeed < TargetWalkSpeed)
+	{
+		// Accelerating
+		InterpSpeed = ZED_SPEED_ACCELERATION;
+	}
+	else
+	{
+		// Decelerating (faster stop)
+		InterpSpeed = ZED_SPEED_DECELERATION;
+	}
+
+	// Interpolate towards target
+	CurrentWalkSpeed = FMath::FInterpConstantTo(CurrentWalkSpeed, TargetWalkSpeed, DeltaTime, InterpSpeed);
+
+	// Apply to character movement
+	GetCharacterMovement()->MaxWalkSpeed = CurrentWalkSpeed;
+}
+
+
+/**
+ *	Checks if the zombie can attack (cooldown elapsed).
+ *
+ * @return True if attack is available
+ */
+bool AZedPawn::CanAttack() const
+{
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	return (CurrentTime - LastAttackTime) >= AttackCooldownDuration;
+}
+
+
+/**
+ *	Resets the attack cooldown timer.
+ *
+ * @return void
+ */
+void AZedPawn::ResetAttackCooldown()
+{
+	LastAttackTime = GetWorld()->GetTimeSeconds();
+
+	// Randomize next cooldown duration for variety
+	AttackCooldownDuration = FMath::FRandRange(ZED_ATTACK_COOLDOWN_MIN, ZED_ATTACK_COOLDOWN_MAX);
+}
+
+
+/**
+ *	Gets the remaining attack cooldown time.
+ *
+ * @return Remaining cooldown in seconds
+ */
+float AZedPawn::GetAttackCooldownRemaining() const
+{
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	float Elapsed = CurrentTime - LastAttackTime;
+	return FMath::Max(0.f, AttackCooldownDuration - Elapsed);
+}
+
+
+/**
+ *	Processes hit reaction (stagger or anger).
+ *
+ * @return void
+ */
+void AZedPawn::ProcessHitReaction()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	AZedAIController* AIC = Cast<AZedAIController>(GetController());
+	if (!AIC)
+	{
+		return;
+	}
+
+	// Roll for stagger vs anger
+	if (FMath::FRand() < ZED_STAGGER_CHANCE)
+	{
+		// 30% chance: Stagger
+		AIC->ApplyStagger();
+	}
+	else
+	{
+		// 70% chance: Anger burst
+		AIC->ApplyAngerBurst();
+	}
+}
+
+
+/**	( Multicast )
+ *	Plays alert sound when first spotting the player.
+ *
+ * @return void
+ */
+void AZedPawn::PlayAlertSound_Implementation()
+{
+	USoundCue* AlertSound = ObjectFromPath<USoundCue>(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_ZedAttack.A_ZedAttack'"));
+	if (AlertSound)
+	{
+		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), AlertSound, GetActorLocation());
+	}
+}
+
+bool AZedPawn::PlayAlertSound_Validate()
+{
+	return true;
+}
+
+
+/**	( Multicast )
+ *	Starts playing chase breathing loop.
+ *
+ * @return void
+ */
+void AZedPawn::StartChaseBreathing_Implementation()
+{
+	if (ZedChaseBreathing && !ZedChaseBreathing->IsPlaying())
+	{
+		// Use the idle sound as placeholder - in production you'd use a dedicated breathing sound
+		USoundCue* BreathingSound = ObjectFromPath<USoundCue>(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_Zed_RND_Idle.A_Zed_RND_Idle'"));
+		if (BreathingSound)
+		{
+			ZedChaseBreathing->SetSound(BreathingSound);
+			ZedChaseBreathing->Play();
+		}
+	}
+}
+
+bool AZedPawn::StartChaseBreathing_Validate()
+{
+	return true;
+}
+
+
+/**	( Multicast )
+ *	Stops chase breathing loop.
+ *
+ * @return void
+ */
+void AZedPawn::StopChaseBreathing_Implementation()
+{
+	if (ZedChaseBreathing && ZedChaseBreathing->IsPlaying())
+	{
+		ZedChaseBreathing->Stop();
+	}
+}
+
+bool AZedPawn::StopChaseBreathing_Validate()
+{
+	return true;
+}
+
+
+/**
+ *	Gets the current AI state from the controller.
+ *
+ * @return Current AI state enum value
+ */
+EZedAIState AZedPawn::GetCurrentAIState() const
+{
+	AZedAIController* AIC = Cast<AZedAIController>(GetController());
+	if (AIC)
+	{
+		return AIC->GetAIState();
+	}
+	return EZedAIState::Patrol;
 }
 
