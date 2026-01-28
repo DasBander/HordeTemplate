@@ -246,8 +246,9 @@ void AHordeGameMode::GameStart(const TArray<FPlayerInfo>& LobbyPlayers)
 					if (Character)
 					{
 						Character->FinishSpawning(GetRandomPlayerSpawn(), false, nullptr);
+						// Fixed: Moved Possess inside null check to prevent crash if spawn fails
+						PC->Possess(Character);
 					}
-					PC->Possess(Character);
 				}
 				else {
 					//If Character not found, Spawn Default Pawn.
@@ -255,8 +256,9 @@ void AHordeGameMode::GameStart(const TArray<FPlayerInfo>& LobbyPlayers)
 					if (Character)
 					{
 						Character->FinishSpawning(GetRandomPlayerSpawn(), false, nullptr);
+						// Fixed: Moved Possess inside null check to prevent crash if spawn fails
+						PC->Possess(Character);
 					}
-					PC->Possess(Character);
 				}
 			}
 

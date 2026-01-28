@@ -80,9 +80,13 @@ EBTNodeResult::Type UMoveToEnemy::ExecuteTask(UBehaviorTreeComponent& OwnerComp,
 			{
 				FAIMoveRequest MoveRequest;
 				AHordeBaseCharacter* BChar = Cast<AHordeBaseCharacter>(BCP->GetValueAsObject("Enemy"));
-				MyController->MoveToActor(BChar, 80.f, true, true, true);
-
-				return EBTNodeResult::InProgress;
+				// Fixed: Added null check for BChar before calling MoveToActor
+				if (BChar)
+				{
+					MyController->MoveToActor(BChar, 80.f, true, true, true);
+					return EBTNodeResult::InProgress;
+				}
+				return EBTNodeResult::Failed;
 			}
 			else if (MyController->GetMoveStatus() == EPathFollowingStatus::Moving)
 			{

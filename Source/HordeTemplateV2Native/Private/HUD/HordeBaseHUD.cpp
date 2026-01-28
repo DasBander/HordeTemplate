@@ -288,7 +288,11 @@ void AHordeBaseHUD::CloseTraderUI()
 {
 	if (bIsTraderUIOpen)
 	{
-		PlayerTraderWidget->RemoveFromParent();
+		// Fixed: Added null check for PlayerTraderWidget before RemoveFromParent
+		if (PlayerTraderWidget)
+		{
+			PlayerTraderWidget->RemoveFromParent();
+		}
 		GetOwningPlayerController()->SetInputMode(FInputModeGameOnly());
 		GetOwningPlayerController()->bShowMouseCursor = false;
 		bIsTraderUIOpen = false;

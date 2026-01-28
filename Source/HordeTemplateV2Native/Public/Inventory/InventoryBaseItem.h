@@ -16,11 +16,15 @@ class HORDETEMPLATEV2NATIVE_API AInventoryBaseItem : public AActor, public IInte
 public:	
 	AInventoryBaseItem();
 
-	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "Inventory Item")
+	// Fixed: Added ReplicatedUsing to properly setup mesh on clients after replication
+	UPROPERTY(EditAnywhere, ReplicatedUsing=OnRep_ItemInfo, BlueprintReadWrite, Category = "Inventory Item")
 		FItem ItemInfo;
 
 	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category = "Inventory Item")
 		FName ItemID;
+
+	UFUNCTION()
+		void OnRep_ItemInfo();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Item")
 		bool Spawned = false;

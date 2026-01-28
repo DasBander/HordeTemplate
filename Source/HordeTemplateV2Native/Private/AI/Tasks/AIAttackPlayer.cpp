@@ -32,9 +32,11 @@ EBTNodeResult::Type UAIAttackPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
 	UBlackboardComponent* BBC = Cast<UBlackboardComponent>(OwnerComp.GetBlackboardComponent());
-	if (BBC)
+	// Fixed: Added null check for GetAIOwner() before accessing GetPawn()
+	AAIController* AIOwner = OwnerComp.GetAIOwner();
+	if (BBC && AIOwner)
 	{
-		AZedPawn* Zed = Cast<AZedPawn>(OwnerComp.GetAIOwner()->GetPawn());
+		AZedPawn* Zed = Cast<AZedPawn>(AIOwner->GetPawn());
 		if (Zed && !Zed->GetIsDead())
 		{
 			TArray<AActor*> ActorsToIgnore = { Zed };
@@ -44,7 +46,7 @@ EBTNodeResult::Type UAIAttackPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerCo
 				AHordeBaseCharacter* Char = Cast<AHordeBaseCharacter>(OutResult.GetActor());
 				if (Char && !Char->GetIsDead())
 				{
-					UGameplayStatics::ApplyPointDamage(Char, FMath::RandRange(5.f, 9.f), Zed->GetActorLocation(), OutResult, OwnerComp.GetAIOwner(), OwnerComp.GetAIOwner()->GetPawn(), nullptr);
+					UGameplayStatics::ApplyPointDamage(Char, FMath::RandRange(5.f, 9.f), Zed->GetActorLocation(), OutResult, AIOwner, Zed, nullptr);
 					Zed->PlayAttackFX();
 				}
 			}

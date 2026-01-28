@@ -97,6 +97,11 @@ FVector UMoveToPatrolPoint::GetPatrolLocation(FName PatrolTag)
 			PatrolLocations.Add(CorePoint->GetActorLocation());
 		}
 	}
+	// Fixed: Check for empty array before RandRange to avoid undefined behavior (RandRange(0, -1))
+	if (PatrolLocations.Num() == 0)
+	{
+		return FVector::ZeroVector;
+	}
 	int32 RetVal = FMath::RandRange(0, PatrolLocations.Num() - 1);
-	return (PatrolLocations.IsValidIndex(RetVal)) ? PatrolLocations[RetVal] : FVector::ZeroVector;
+	return PatrolLocations[RetVal];
 }

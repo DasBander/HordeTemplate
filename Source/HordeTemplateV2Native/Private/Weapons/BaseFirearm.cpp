@@ -156,8 +156,21 @@ void ABaseFirearm::ServerToggleFireMode_Implementation()
 {
 	EFireMode CurrentFireMode = EFireMode(FireMode);
 	FItem CurrentWeaponItem = UInventoryHelpers::FindItemByID(FName(*WeaponID));
+
+	// Fixed: Guard against empty FireModes array to prevent crash
+	if (CurrentWeaponItem.FireModes.Num() == 0)
+	{
+		return;
+	}
+
 	int32 CurrentSelectedIndex = CurrentWeaponItem.FireModes.Find(CurrentFireMode);
-	if (CurrentSelectedIndex == (CurrentWeaponItem.FireModes.Num() - 1))
+
+	// Fixed: Handle case where current fire mode is not in the array
+	if (CurrentSelectedIndex == INDEX_NONE)
+	{
+		FireMode = (uint8)CurrentWeaponItem.FireModes[0];
+	}
+	else if (CurrentSelectedIndex == (CurrentWeaponItem.FireModes.Num() - 1))
 	{
 		FireMode = (uint8)CurrentWeaponItem.FireModes[0];
 	}

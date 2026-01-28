@@ -26,7 +26,8 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Zed AI")
 		class UAudioComponent* ZedIdleSound;
 
-	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Zed AI")
+	// Optimization: PatrolTag is only used server-side for AI behavior, removed replication
+	UPROPERTY(BlueprintReadOnly, Category = "Zed AI")
 		FName PatrolTag;
 
 	UFUNCTION(NetMulticast, Unreliable, WithValidation, BlueprintCallable, Category = "Zed AI")

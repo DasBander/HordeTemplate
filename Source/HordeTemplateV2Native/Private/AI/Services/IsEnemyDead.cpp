@@ -31,10 +31,12 @@ void UIsEnemyDead::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
 	UBlackboardComponent* BBC = Cast<UBlackboardComponent>(OwnerComp.GetBlackboardComponent());
-	if (BBC)
+	// Fixed: Added null check for GetAIOwner() before accessing GetPawn() or SetFocus()
+	AAIController* AIOwner = OwnerComp.GetAIOwner();
+	if (BBC && AIOwner)
 	{
 		AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(BBC->GetValueAsObject("Enemy"));
-		AZedPawn* Zed = Cast<AZedPawn>(OwnerComp.GetAIOwner()->GetPawn());
+		AZedPawn* Zed = Cast<AZedPawn>(AIOwner->GetPawn());
 		if (PLY && PLY->GetIsDead())
 		{
 			BBC->SetValueAsObject("Enemy", nullptr);
@@ -42,7 +44,7 @@ void UIsEnemyDead::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory
 			{
 				Zed->ModifyWalkSpeed(200.f);
 			}
-			OwnerComp.GetAIOwner()->SetFocus(nullptr);
+			AIOwner->SetFocus(nullptr);
 		}
 		else if(PLY && !PLY->GetIsDead())
 		{

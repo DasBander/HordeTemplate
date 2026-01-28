@@ -53,8 +53,14 @@ void AExplosiveProjectile::OnProjectileImpact(const FHitResult& ImpactResult, co
 	if (HasAuthority())
 	{
 		PlayWorldFX(ImpactResult.ImpactPoint);
-		TArray<AActor*> IgnoredDamageActors = { GetOwner() };
-		UGameplayStatics::ApplyRadialDamageWithFalloff(GetWorld(), 150.f, 100.f, ImpactResult.ImpactPoint, 800.f, 1600.f, 1.f, nullptr, IgnoredDamageActors, GetOwner(), GetOwner()->GetInstigatorController(), ECC_Visibility);
+		// Fixed: Cache and null-check GetOwner() before using it
+		AActor* OwnerActor = GetOwner();
+		TArray<AActor*> IgnoredDamageActors;
+		if (OwnerActor)
+		{
+			IgnoredDamageActors.Add(OwnerActor);
+		}
+		UGameplayStatics::ApplyRadialDamageWithFalloff(GetWorld(), 150.f, 100.f, ImpactResult.ImpactPoint, 800.f, 1600.f, 1.f, nullptr, IgnoredDamageActors, OwnerActor, OwnerActor ? OwnerActor->GetInstigatorController() : nullptr, ECC_Visibility);
 	}
 }
 

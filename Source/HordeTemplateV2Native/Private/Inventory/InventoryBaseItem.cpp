@@ -35,9 +35,29 @@ void AInventoryBaseItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-
+	// Fixed: Use DOREPLIFETIME_CONDITION with notify for proper client-side mesh setup
 	DOREPLIFETIME(AInventoryBaseItem, ItemInfo);
 	DOREPLIFETIME(AInventoryBaseItem, ItemID);
+}
+
+/**
+ * OnRep for ItemInfo - Called on clients when ItemInfo is replicated.
+ * Sets up the mesh after replication is complete.
+ *
+ * @param
+ * @return void
+ */
+void AInventoryBaseItem::OnRep_ItemInfo()
+{
+	// Setup mesh on client after replication
+	if (ItemInfo.WorldModel)
+	{
+		WorldMesh->SetStaticMesh(ItemInfo.WorldModel);
+		if (Spawned)
+		{
+			WorldMesh->SetSimulatePhysics(true);
+		}
+	}
 }
 
 /** ( Virtual; Overridden )

@@ -2,6 +2,7 @@
 
 #include "HordeBaseController.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "HordePlayerState.h"
 #include "Character/HordeBaseCharacter.h"
 #include "HUD/HordeBaseHUD.h"
@@ -111,7 +112,7 @@ void AHordeBaseController::SetupInputComponent()
 }
 
 /**
- *	Drops Current Firearm and Kicks Player.
+ *	Drops Current Firearm and Disconnects from Server.
  *
  * @param
  * @return void
@@ -122,12 +123,14 @@ void AHordeBaseController::DisconnectFromServer()
 	if (PLY && PLY->GetCurrentFirearm())
 	{
 		PLY->Inventory->ServerDropItem(PLY->GetCurrentFirearm());
-		
+
 	}
-	AHordePlayerState* PS = Cast<AHordePlayerState>(PlayerState);
-	if (PS)
+	// Fixed: GettingKicked is a Client RPC which cannot be called from client
+	// Instead, just disconnect directly using the engine's built-in function
+	UWorld* World = GetWorld();
+	if (World)
 	{
-		PS->GettingKicked();
+		UKismetSystemLibrary::QuitGame(World, this, EQuitPreference::Quit, false);
 	}
 }
 

@@ -496,13 +496,31 @@ void UInventoryComponent::BeginPlay()
 
 void UInventoryComponent::OnRep_ActiveItemIndex()
 {
-	if (Inventory.IsValidIndex(ActiveItemIndex))
+	// Fixed: On owning client, Inventory array is not replicated (server-authoritative)
+	// Instead of accessing Inventory, get the weapon info from the replicated CurrentSelectedFirearm
+	// The server already spawns and replicates the firearm actor
+	AHordeBaseCharacter* PLY = Cast<AHordeBaseCharacter>(GetOwner());
+	if (PLY)
 	{
-		OnActiveItemChanged.Broadcast(
-			Inventory[ActiveItemIndex].ItemID.ToString(),
-			ActiveItemIndex,
-			Inventory[ActiveItemIndex].DefaultLoadedAmmo
-		);
+		ABaseFirearm* Firearm = PLY->GetCurrentFirearm();
+		if (Firearm)
+		{
+			// Firearm actor is replicated, so we can get info from it
+			OnActiveItemChanged.Broadcast(
+				Firearm->WeaponID,
+				ActiveItemIndex,
+				Firearm->LoadedAmmo
+			);
+		}
+		else
+		{
+			// No weapon equipped (hands) - broadcast with default values
+			OnActiveItemChanged.Broadcast(
+				TEXT("Item_Hands"),
+				ActiveItemIndex,
+				0
+			);
+		}
 	}
 }
 

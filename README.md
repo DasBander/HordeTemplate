@@ -1,4 +1,4 @@
-# Horde Template V2 (Native) - v2.7.1
+# Horde Template V2 (Native) - v2.7.3
 
 [![Unreal Engine](https://img.shields.io/badge/Unreal%20Engine-5.7-blue)](https://www.unrealengine.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -186,6 +186,42 @@ Default controls (configurable in `Config/DefaultInput.ini`):
 ---
 
 ## Changelog
+
+### Update 2.7.3
+```
+Spectator System Fixes:
+- Fixed BaseSpectator using TObjectIterator instead of TActorIterator (was iterating ALL objects in memory, not just current world)
+- Fixed BaseSpectator ClientFocusPlayer missing null check for Player parameter
+
+AI System Fixes:
+- Fixed AIAttackPlayer crash when GetAIOwner() returns null
+- Fixed MoveToEnemy calling MoveToActor with potentially null BChar parameter
+- Fixed MoveToPatrolPoint FMath::RandRange crash with empty PatrolLocations array (RandRange(0, -1))
+- Fixed IsEnemyDead service crash when GetAIOwner() returns null (2 instances)
+
+Gameplay System Fixes:
+- Fixed HordeGameMode GameStart calling PC->Possess with null Character (moved inside null check)
+
+Weapon System Fixes:
+- Fixed BaseFirearm ServerToggleFireMode crash when FireModes array is empty
+- Fixed BaseFirearm ServerToggleFireMode not handling case when current fire mode isn't in array
+
+HUD System Fixes:
+- Fixed HordeBaseHUD CloseTraderUI not checking if PlayerTraderWidget is null before RemoveFromParent
+
+Projectile System Fixes:
+- Fixed ExplosiveProjectile crash when GetOwner() returns null during OnProjectileImpact (owner destroyed before impact)
+
+Controller System Fixes:
+- Fixed HordeBaseController DisconnectFromServer calling Client RPC from client (RPC misuse - now uses QuitGame directly)
+
+Replication Fixes:
+- Fixed InventoryComponent OnRep_ActiveItemIndex accessing non-replicated Inventory array (now uses replicated firearm data)
+- Fixed InventoryBaseItem mesh not appearing on clients (added OnRep_ItemInfo for proper client-side setup)
+
+Replication Optimizations:
+- Removed unnecessary replication of ZedPawn PatrolTag (only used server-side for AI behavior)
+```
 
 ### Update 2.7.1
 ```

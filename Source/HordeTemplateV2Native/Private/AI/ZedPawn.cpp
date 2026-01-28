@@ -88,7 +88,8 @@ void AZedPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 
 	DOREPLIFETIME(AZedPawn, Health);
 	DOREPLIFETIME(AZedPawn, IsDead);
-	DOREPLIFETIME(AZedPawn, PatrolTag);
+	// Optimization: PatrolTag is only used server-side for AI behavior, no need to replicate
+	// DOREPLIFETIME(AZedPawn, PatrolTag);
 }
 
 

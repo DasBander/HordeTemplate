@@ -1,7 +1,7 @@
 
 
 #include "BaseSpectator.h"
-
+#include "EngineUtils.h"
 
 /**
  * Constructor for ABaseSpectator
@@ -35,7 +35,8 @@ void ABaseSpectator::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 void ABaseSpectator::ClientFocusPlayer_Implementation(AHordeBaseCharacter* Player)
 {
 	APlayerController* PC = Cast<APlayerController>(GetController());
-	if (PC)
+	// Fixed: Added null check for Player parameter
+	if (PC && Player)
 	{
 		PC->SetViewTargetWithBlend(Player, 1.f, VTBlend_EaseIn, 0.5f, true);
 	}
@@ -52,10 +53,12 @@ AHordeBaseCharacter* ABaseSpectator::GetRandomAlivePlayer()
 {
 	TArray<AHordeBaseCharacter*> AliveCharacter;
 
-	for (TObjectIterator<AHordeBaseCharacter> Itr; Itr; ++Itr)
+	// Fixed: Use TActorIterator instead of TObjectIterator to only iterate actors in current world
+	// TObjectIterator iterates ALL objects in memory which could include objects from other worlds/PIE instances
+	for (TActorIterator<AHordeBaseCharacter> Itr(GetWorld()); Itr; ++Itr)
 	{
 		AHordeBaseCharacter* PLY = *Itr;
-		if (!PLY->GetIsDead())
+		if (PLY && !PLY->GetIsDead())
 		{
 			AliveCharacter.Add(PLY);
 		}
