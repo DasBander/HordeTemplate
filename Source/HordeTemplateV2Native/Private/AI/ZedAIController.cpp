@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "ZedAIController.h"
 #include "ZedPawn.h"
@@ -8,6 +10,11 @@
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+/**
+ * @file ZedAIController.cpp
+ * @brief Implementation of zombie AI controller with state machine, perception, and combat logic
+ * @author Marc Fraedrich
+ */
 
 /**
  *	Constructor

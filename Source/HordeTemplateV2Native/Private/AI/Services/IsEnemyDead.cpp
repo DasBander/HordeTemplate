@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "IsEnemyDead.h"
 #include "Character/HordeBaseCharacter.h"
@@ -6,6 +8,12 @@
 #include "AI/ZedAIController.h"
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 #include "HordeTemplateV2Native.h"
+
+/**
+ * @file IsEnemyDead.cpp
+ * @brief Implementation of the enemy status monitoring behavior tree service
+ * @author Marc Fraedrich
+ */
 
 /**
  * Constructor

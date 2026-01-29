@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #pragma once
+
+/**
+ * @file HordeGameState.h
+ * @brief Replicated game state managing round info, player tracking, lobby, character trading, and scoring
+ * @author Marc Fraedrich
+ */
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"

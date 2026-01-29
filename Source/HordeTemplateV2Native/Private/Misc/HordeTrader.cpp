@@ -1,3 +1,6 @@
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "HordeTrader.h"
 #include "HordeTemplateV2Native.h"
@@ -9,6 +12,12 @@
 #include "Animation/AnimBlueprintGeneratedClass.h"
 #include "Animation/AnimInstance.h"
 #include "ConstructorHelpers.h"
+
+/**
+ * @file HordeTrader.cpp
+ * @brief Implementation of NPC trader for purchasing weapons and items
+ * @author Marc Fraedrich
+ */
 
 /**
  * Constructor for AHordeTrader

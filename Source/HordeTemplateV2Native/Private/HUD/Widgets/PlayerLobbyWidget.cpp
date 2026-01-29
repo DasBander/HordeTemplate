@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "PlayerLobbyWidget.h"
 #include "Gameplay/HordeGameState.h"
@@ -6,6 +8,12 @@
 #include "Gameplay/HordeBaseController.h"
 #include "HordeTemplateV2Native.h"
 #include "Kismet/GameplayStatics.h"
+
+/**
+ * @file PlayerLobbyWidget.cpp
+ * @brief Implementation of lobby UI with player list, timer, and character trading
+ * @author Marc Fraedrich
+ */
 
 /** ( Virtual; Overridden )
  * Binds the Delegates and Updates the Lobby Info inside the Widget.

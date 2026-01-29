@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "MoveToEnemy.h"
 #include "AIModule/Classes/AIController.h"
@@ -7,6 +9,12 @@
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Character/HordeBaseCharacter.h"
+
+/**
+ * @file MoveToEnemy.cpp
+ * @brief Implementation of enemy pursuit behavior tree task
+ * @author Marc Fraedrich
+ */
 
 /**
  *	Constructor

@@ -1,8 +1,16 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "EndGameTrigger.h"
 #include "Character/HordeBaseCharacter.h"
 #include "Gameplay/HordeGameState.h"
+
+/**
+ * @file EndGameTrigger.cpp
+ * @brief Implementation of collision trigger that ends the game on player overlap
+ * @author Marc Fraedrich
+ */
 
 /**
  * Constructor for AEndGameTrigger

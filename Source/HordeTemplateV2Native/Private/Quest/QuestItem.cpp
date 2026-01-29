@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "Quest/QuestItem.h"
 #include "Quest/QuestManager.h"
@@ -9,6 +11,11 @@
 #include "Sound/SoundCue.h"
 #include "Net/UnrealNetwork.h"
 
+/**
+ * @file QuestItem.cpp
+ * @brief Implementation of collectible quest items with visual effects and pickup logic
+ * @author Marc Fraedrich
+ */
 
 AQuestItem::AQuestItem()
 {

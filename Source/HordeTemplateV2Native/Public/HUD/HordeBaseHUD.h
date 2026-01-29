@@ -1,5 +1,14 @@
-// Public/HUD/HordeBaseHUD.h
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
+
 #pragma once
+
+/**
+ * @file HordeBaseHUD.h
+ * @brief Main HUD class managing widget creation, display, and game state transitions
+ * @author Marc Fraedrich
+ */
 
 #include "CoreMinimal.h"
 #include "LobbyStructures.h"

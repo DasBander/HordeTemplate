@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "MoveRandomly.h"
 #include "AIController.h"
@@ -6,6 +8,12 @@
 #include "NavigationSystem/Public/NavigationSystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/PathFollowingComponent.h"
+
+/**
+ * @file MoveRandomly.cpp
+ * @brief Implementation of random patrol movement behavior tree task
+ * @author Marc Fraedrich
+ */
 
 /**
  *	Constructor

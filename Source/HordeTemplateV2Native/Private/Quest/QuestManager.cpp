@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "Quest/QuestManager.h"
 #include "Quest/QuestTypes.h"
@@ -15,6 +17,11 @@
 #include "Engine/DataTable.h"
 #include "HordeTemplateV2Native.h"
 
+/**
+ * @file QuestManager.cpp
+ * @brief Implementation of quest management with objectives, rewards, and multiplayer synchronization
+ * @author Marc Fraedrich
+ */
 
 UQuestManager::UQuestManager()
 {

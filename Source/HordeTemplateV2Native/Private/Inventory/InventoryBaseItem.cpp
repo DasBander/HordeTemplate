@@ -1,8 +1,16 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "InventoryBaseItem.h"
 #include "InventoryComponent.h"
 #include "InventoryHelpers.h"
+
+/**
+ * @file InventoryBaseItem.cpp
+ * @brief Implementation of interactable world items with replication support
+ * @author Marc Fraedrich
+ */
 
 /**
  * Constructor for InventoryBaseItem

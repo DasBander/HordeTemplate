@@ -1,6 +1,15 @@
 
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "BloodImpact.h"
+
+/**
+ * @file BloodImpact.cpp
+ * @brief Implementation of blood impact with flesh-specific particle and sound effects
+ * @author Marc Fraedrich
+ */
 #include "ConstructorHelpers.h"
 
 /**

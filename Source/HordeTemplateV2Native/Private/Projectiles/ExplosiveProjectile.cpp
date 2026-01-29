@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "ExplosiveProjectile.h"
+
+/**
+ * @file ExplosiveProjectile.cpp
+ * @brief Implementation of explosive projectile with radial damage and world FX on impact
+ * @author Marc Fraedrich
+ */
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Sound/SoundCue.h"

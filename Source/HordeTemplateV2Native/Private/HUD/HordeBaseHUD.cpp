@@ -1,3 +1,7 @@
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
+
 #include "HordeBaseHUD.h"
 #include "Engine/Canvas.h"
 #include "TextureResource.h"
@@ -6,6 +10,12 @@
 #include "Gameplay/HordeGameState.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Character/HordeBaseCharacter.h"
+
+/**
+ * @file HordeBaseHUD.cpp
+ * @brief Implementation of the main HUD class managing widget lifecycle and game state transitions
+ * @author Marc Fraedrich
+ */
 
 /**
  * Swaps widgets out and switches input mode depending on the game status. 

@@ -1,7 +1,15 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "LobbyChat.h"
 #include "Gameplay/HordePlayerState.h"
+
+/**
+ * @file LobbyChat.cpp
+ * @brief Implementation of lobby chat functionality for pre-game communication
+ * @author Marc Fraedrich
+ */
 
 /** ( Virtual; Overridden )
  * Binds delegate for On Message Received Function.

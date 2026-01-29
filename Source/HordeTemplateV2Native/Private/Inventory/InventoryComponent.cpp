@@ -1,6 +1,14 @@
-// InventoryComponent.cpp
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "InventoryComponent.h"
+
+/**
+ * @file InventoryComponent.cpp
+ * @brief Implementation of replicated inventory system with weapon management and ammo tracking
+ * @author Marc Fraedrich
+ */
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 #include "Engine/World.h"

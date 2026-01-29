@@ -1,15 +1,19 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #pragma once
+
+/**
+ * @file LobbyPlayerWidget.h
+ * @brief Widget displaying individual player information in the lobby player list
+ * @author Marc Fraedrich
+ */
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Gameplay/LobbyStructures.h"
 #include "LobbyPlayerWidget.generated.h"
-
-/**
- * 
- */
 UCLASS()
 class HORDETEMPLATEV2NATIVE_API ULobbyPlayerWidget : public UUserWidget
 {

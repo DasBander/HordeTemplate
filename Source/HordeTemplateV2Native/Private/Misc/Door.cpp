@@ -1,9 +1,17 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "Door.h"
 #include "ConstructorHelpers.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimBlueprintGeneratedClass.h"
+
+/**
+ * @file Door.cpp
+ * @brief Implementation of replicated interactable door with animation support
+ * @author Marc Fraedrich
+ */
 
 /**
  * Constructor for ADoor

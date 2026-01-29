@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "BaseFirearm.h"
+
+/**
+ * @file BaseFirearm.cpp
+ * @brief Implementation of server-authoritative weapon system with spread, timing, and fire modes
+ * @author Marc Fraedrich
+ */
 #include "Gameplay/GameplayStructures.h"
 #include "Inventory/InventoryHelpers.h"
 #include "Character/HordeBaseCharacter.h"

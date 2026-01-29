@@ -1,6 +1,15 @@
 
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #pragma once
+
+/**
+ * @file MoveToPatrolPoint.h
+ * @brief Behavior tree task for navigating to tagged patrol waypoints
+ * @author Marc Fraedrich
+ */
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"

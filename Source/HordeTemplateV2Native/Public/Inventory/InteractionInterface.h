@@ -1,4 +1,15 @@
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
+
 #pragma once
+
+/**
+ * @file InteractionInterface.h
+ * @brief Interface and data structures for interactive world objects
+ * @author Marc Fraedrich
+ */
+
 #include "EngineMinimal.h"
 #include "Sound/SoundCue.h"
 #include "InteractionInterface.generated.h"

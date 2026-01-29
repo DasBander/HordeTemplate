@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "PlayerHUDWidget.h"
 #include "GameFramework/Character.h"
@@ -7,6 +9,12 @@
 #include "Gameplay/HordeWorldSettings.h"
 #include "InventoryHelpers.h"
 #include "HordeTemplateV2Native.h"
+
+/**
+ * @file PlayerHUDWidget.cpp
+ * @brief Implementation of main gameplay HUD with health, weapon, and game state display
+ * @author Marc Fraedrich
+ */
 
 /**
  * Calls delegate to hide the Interaction Text.

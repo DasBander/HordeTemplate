@@ -1,9 +1,17 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "SafeZoneDoor.h"
 #include "ConstructorHelpers.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimBlueprintGeneratedClass.h"
+
+/**
+ * @file SafeZoneDoor.cpp
+ * @brief Implementation of one-way animated safe zone door
+ * @author Marc Fraedrich
+ */
 
 /**
  * Constructor for ASafeZoneDoor

@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "HordeCharacterAnimInstance.h"
+
+/**
+ * @file HordeCharacterAnimInstance.cpp
+ * @brief Implementation of character animation instance with state updates per frame
+ * @author Marc Fraedrich
+ */
 
 /**
  *	Constructor for UHordeCharacterAnimInstance

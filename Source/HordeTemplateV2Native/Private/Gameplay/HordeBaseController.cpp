@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "HordeBaseController.h"
 #include "Kismet/GameplayStatics.h"
@@ -6,6 +8,12 @@
 #include "HordePlayerState.h"
 #include "Character/HordeBaseCharacter.h"
 #include "HUD/HordeBaseHUD.h"
+
+/**
+ * @file HordeBaseController.cpp
+ * @brief Implementation of base player controller with UI, chat, input, and client RPC handling
+ * @author Marc Fraedrich
+ */
 
 /** ( Client )
  *	Runs Close Trader UI in HUD Class

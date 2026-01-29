@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "Quest/QuestTrigger.h"
 #include "Quest/QuestManager.h"
@@ -10,6 +12,11 @@
 #include "ConstructorHelpers.h"
 #include "Runtime/Engine/Public/EngineUtils.h"
 
+/**
+ * @file QuestTrigger.cpp
+ * @brief Implementation of volume-based quest triggers with prerequisite support
+ * @author Marc Fraedrich
+ */
 
 AQuestTrigger::AQuestTrigger()
 {

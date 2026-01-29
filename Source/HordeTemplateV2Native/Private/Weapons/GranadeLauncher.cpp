@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "GranadeLauncher.h"
+
+/**
+ * @file GranadeLauncher.cpp
+ * @brief Implementation of grenade launcher with custom mesh and disabled muzzle flash
+ * @author Marc Fraedrich
+ */
 #include "ConstructorHelpers.h"
 #include "Engine/SkeletalMesh.h"
 #include "Components/SkeletalMeshComponent.h"
