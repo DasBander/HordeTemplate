@@ -306,7 +306,7 @@ void AZedAIController::ClearLastKnownEnemyLocation()
  */
 bool AZedAIController::HasLineOfSightToEnemy() const
 {
-	UBlackboardComponent* BB = GetBlackboardComponent();
+	const UBlackboardComponent* BB = GetBlackboardComponent();
 	if (!BB)
 	{
 		return false;

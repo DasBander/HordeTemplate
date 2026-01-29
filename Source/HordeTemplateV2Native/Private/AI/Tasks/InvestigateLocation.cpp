@@ -7,6 +7,7 @@
 #include "AI/ZedAIController.h"
 #include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
 #include "AIModule/Classes/AIController.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "NavigationSystem.h"
 #include "HordeTemplateV2Native.h"
 
@@ -82,7 +83,8 @@ EBTNodeResult::Type UInvestigateLocation::ExecuteTask(UBehaviorTreeComponent& Ow
 		true	// bAllowPartialPath
 	);
 
-	if (MoveResult == EPathFollowingRequestResult::Failed)
+	if (MoveResult != EPathFollowingRequestResult::RequestSuccessful &&
+		MoveResult != EPathFollowingRequestResult::AlreadyAtGoal)
 	{
 		// Can't reach location, clear it and return to patrol
 		ZedController->ClearLastKnownEnemyLocation();
@@ -149,7 +151,7 @@ void UInvestigateLocation::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* No
 		{
 			// Check if movement is complete (path following finished)
 			EPathFollowingStatus::Type MoveStatus = AIOwner->GetMoveStatus();
-			if (MoveStatus == EPathFollowingStatus::Idle)
+			if (MoveStatus != EPathFollowingStatus::Moving)
 			{
 				// Movement completed (reached as close as possible)
 				Memory->bHasReachedLocation = true;

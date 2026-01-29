@@ -967,7 +967,7 @@ void UQuestManager::AwardQuestRewards(const FQuestData& Quest)
 			}
 			if (Quest.CompletionMoney > 0)
 			{
-				HPS->AddMoney(Quest.CompletionMoney);
+				HPS->ModifyMoney(Quest.CompletionMoney);
 			}
 		}
 	}
@@ -999,7 +999,7 @@ void UQuestManager::AwardObjectiveRewards(const FQuestObjective& Objective)
 			}
 			if (Objective.MoneyReward > 0)
 			{
-				HPS->AddMoney(Objective.MoneyReward);
+				HPS->ModifyMoney(Objective.MoneyReward);
 			}
 		}
 	}

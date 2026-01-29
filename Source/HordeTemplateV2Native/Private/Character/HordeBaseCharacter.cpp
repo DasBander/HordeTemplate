@@ -160,7 +160,7 @@ void AHordeBaseCharacter::PostInitializeComponents()
  */
 float AHordeBaseCharacter::GetRemotePitch()
 {
-	return RemoteViewPitch * 360.0f / 255.0f;
+	return GetRemoteViewPitch() * 360.0f / 255.0f;
 }
 
 
