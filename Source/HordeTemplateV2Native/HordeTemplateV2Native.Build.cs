@@ -22,6 +22,7 @@ public class HordeTemplateV2Native : ModuleRules
             "Slate",
             "SlateCore",
             "LevelSequence",
+            "MovieScene",
             "RHI",
             "ApexDestruction",
             "AIModule",
