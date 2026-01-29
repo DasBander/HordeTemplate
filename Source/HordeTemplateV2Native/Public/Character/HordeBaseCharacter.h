@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #pragma once
+
+/**
+ * @file HordeBaseCharacter.h
+ * @brief Main player character with health, stamina, weapons, inventory, and interaction systems
+ * @author Marc Fraedrich
+ */
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"

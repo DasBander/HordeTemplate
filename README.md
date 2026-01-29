@@ -430,7 +430,7 @@ Contributions are welcome! Please feel free to submit issues and pull requests.
 **MIT License**
 
 ```
-Copyright (c) 2018-2025 Marc Fraedrich under FinalSpark Gamestudios
+Copyright (c) 2018 - 2026 Marc Fraedrich
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

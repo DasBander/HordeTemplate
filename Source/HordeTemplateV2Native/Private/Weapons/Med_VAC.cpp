@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "Med_VAC.h"
+
+/**
+ * @file Med_VAC.cpp
+ * @brief Implementation of medical VAC healing device with animation and health restoration
+ * @author Marc Fraedrich
+ */
 #include "Components/SkeletalMeshComponent.h"
 #include "Character/HordeBaseCharacter.h"
 #include "Animation/AnimMontage.h"

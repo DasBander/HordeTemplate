@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #pragma once
+
+/**
+ * @file HordePlayerState.h
+ * @brief Player state tracking kills, points, headshots, money, character selection, and lobby interactions
+ * @author Marc Fraedrich
+ */
 
 #include "CoreMinimal.h"
 #include "Runtime/CoreUObject/Public/UObject/TextProperty.h"

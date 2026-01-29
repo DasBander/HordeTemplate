@@ -1,10 +1,18 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "TraderItemWidget.h"
 #include "Gameplay/HordePlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "HordeTemplateV2Native.h"
+
+/**
+ * @file TraderItemWidget.cpp
+ * @brief Implementation of trader item purchase functionality with price checking
+ * @author Marc Fraedrich
+ */
 
 /**
  * Buys Item and plays buy sound on owning player.

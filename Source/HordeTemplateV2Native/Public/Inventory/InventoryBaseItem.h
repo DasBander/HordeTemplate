@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #pragma once
+
+/**
+ * @file InventoryBaseItem.h
+ * @brief Base actor class for world-placed interactable inventory items
+ * @author Marc Fraedrich
+ */
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"

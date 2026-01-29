@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "HordePlayerState.h"
 #include "HordeGameState.h"
@@ -11,6 +13,12 @@
 #include "Runtime/Core/Public/Math/NumericLimits.h"
 #include "Misc/HordeTrader.h"
 #include "HUD/HordeBaseHUD.h"
+
+/**
+ * @file HordePlayerState.cpp
+ * @brief Implementation of player state with scoring, economy, character trading, and chat handling
+ * @author Marc Fraedrich
+ */
 
 /** ( Overridden )
  *	Defines Replicated Props.

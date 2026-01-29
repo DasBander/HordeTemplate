@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "HordeGameState.h"
 #include "HordeTemplateV2Native.h"
@@ -9,6 +11,12 @@
 #include "AI/ZedPawn.h"
 #include "Runtime/Engine/Public/EngineUtils.h"
 #include "Misc/HordeTrader.h"
+
+/**
+ * @file HordeGameState.cpp
+ * @brief Implementation of replicated game state with lobby, rounds, trading, and scoring systems
+ * @author Marc Fraedrich
+ */
 
 /** ( Overridden )
  *	Definition of Replicated Props

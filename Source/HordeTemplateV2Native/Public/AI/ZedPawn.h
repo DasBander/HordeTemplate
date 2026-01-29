@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #pragma once
+
+/**
+ * @file ZedPawn.h
+ * @brief Zombie enemy pawn with smooth movement, hit reactions, attack cooldowns, and audio feedback
+ * @author Marc Fraedrich
+ */
 #include "CoreMinimal.h"
 #include "Gameplay/HordePlayerState.h"
 #include "GameFramework/Character.h"

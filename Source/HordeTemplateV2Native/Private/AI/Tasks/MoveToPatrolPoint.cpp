@@ -1,4 +1,7 @@
 
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "MoveToPatrolPoint.h"
 #include "EngineUtils.h"
@@ -6,6 +9,12 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "AIController.h"
+
+/**
+ * @file MoveToPatrolPoint.cpp
+ * @brief Implementation of patrol point navigation behavior tree task
+ * @author Marc Fraedrich
+ */
 
 /**
  *	Constructor

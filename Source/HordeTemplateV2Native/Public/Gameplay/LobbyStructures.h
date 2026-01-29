@@ -1,4 +1,15 @@
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
+
 #pragma once
+
+/**
+ * @file LobbyStructures.h
+ * @brief Lobby and multiplayer data structures for chat, player info, characters, levels, trades, and scoring
+ * @author Marc Fraedrich
+ */
+
 #include "Engine/DataTable.h"
 #include "GameFramework/Character.h"
 #include "LobbyStructures.generated.h"

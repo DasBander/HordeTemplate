@@ -1,7 +1,15 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "PlayerScoreboardItem.h"
 #include "Gameplay/HordePlayerState.h"
+
+/**
+ * @file PlayerScoreboardItem.cpp
+ * @brief Implementation of individual scoreboard entry with player stats and status
+ * @author Marc Fraedrich
+ */
 
 /**
  * Returns color depending on if the character is dead or not.

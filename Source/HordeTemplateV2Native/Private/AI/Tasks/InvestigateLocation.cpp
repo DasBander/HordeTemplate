@@ -1,4 +1,6 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "InvestigateLocation.h"
 #include "AI/ZedPawn.h"
@@ -8,6 +10,11 @@
 #include "NavigationSystem.h"
 #include "HordeTemplateV2Native.h"
 
+/**
+ * @file InvestigateLocation.cpp
+ * @brief Implementation of the investigation behavior tree task with look-around behavior
+ * @author Marc Fraedrich
+ */
 
 /**
  * Constructor

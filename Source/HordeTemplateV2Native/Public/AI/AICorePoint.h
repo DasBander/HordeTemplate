@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #pragma once
+
+/**
+ * @file AICorePoint.h
+ * @brief Actor that serves as a patrol waypoint for AI navigation
+ * @author Marc Fraedrich
+ */
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"

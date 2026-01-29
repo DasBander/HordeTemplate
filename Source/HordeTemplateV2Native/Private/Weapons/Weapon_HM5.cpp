@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "Weapon_HM5.h"
+
+/**
+ * @file Weapon_HM5.cpp
+ * @brief Implementation of HM5 assault rifle with mesh, muzzle flash, and sound setup
+ * @author Marc Fraedrich
+ */
 #include "ConstructorHelpers.h"
 
 /**

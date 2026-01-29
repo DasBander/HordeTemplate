@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "HordeViewportClient.h"
+
+/**
+ * @file HordeViewportClient.cpp
+ * @brief Implementation of custom viewport client with widget stack management
+ * @author Marc Fraedrich
+ */
 
 /** ( Virtual; Overridden )
  * Adds Widgets to the Viewport Content Stack.

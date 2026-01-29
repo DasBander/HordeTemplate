@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #pragma once
+
+/**
+ * @file HordeGameMode.h
+ * @brief Main game mode handling wave-based survival, lobby management, player spawning, and round progression
+ * @author Marc Fraedrich
+ */
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"

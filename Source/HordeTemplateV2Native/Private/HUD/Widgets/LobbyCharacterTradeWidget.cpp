@@ -1,10 +1,18 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "LobbyCharacterTradeWidget.h"
 #include "Gameplay/HordeGameState.h"
 #include "Gameplay/HordePlayerState.h"
 #include "HordeTemplateV2Native.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+
+/**
+ * @file LobbyCharacterTradeWidget.cpp
+ * @brief Implementation of character trading UI displaying trade progress and character info
+ * @author Marc Fraedrich
+ */
 
 /**
  * Returns the Trade Time for the Trade Widget.

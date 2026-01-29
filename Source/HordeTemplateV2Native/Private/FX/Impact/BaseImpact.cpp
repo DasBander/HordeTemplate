@@ -1,6 +1,14 @@
-
+// Copyright (c) 2018 - 2026 Marc Fraedrich
+// Horde Template V2 (Native) - A cooperative zombie survival game framework
+// Licensed under the MIT License
 
 #include "BaseImpact.h"
+
+/**
+ * @file BaseImpact.cpp
+ * @brief Implementation of base impact effect with particle and sound setup
+ * @author Marc Fraedrich
+ */
 #include "ConstructorHelpers.h"
 
 /**
