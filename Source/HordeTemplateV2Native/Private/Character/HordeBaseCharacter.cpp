@@ -55,6 +55,13 @@ AHordeBaseCharacter::AHordeBaseCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
+	// Configure network smoothing for simulated proxies to reduce jitter
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
+		GetCharacterMovement()->NetworkSimulatedSmoothRotationTime = 0.05f; // Smooth rotation over 50ms
+		GetCharacterMovement()->NetworkSimulatedSmoothLocationTime = 0.04f; // Smooth location over 40ms
+	}
 
 	const ConstructorHelpers::FObjectFinder<USkeletalMesh> PlayerMeshAsset(TEXT("SkeletalMesh'/Game/HordeTemplateBP/Assets/Mannequin/Character/Mesh/SK_Mannequin.SK_Mannequin'"));
 	if (PlayerMeshAsset.Succeeded()) {
@@ -891,33 +898,42 @@ void AHordeBaseCharacter::IncreaseStamina()
 
 /**
  *	Function that gets called if the Active Item has been changed. Stops Weapon Fire and Destroys Firearm. Spawns new Firearm by given Item ID and updates Animation Mode.
+ *	Note: Only the server should spawn/destroy firearms and set AnimMode - clients receive these via replication.
  *
  * @param The Item ID, Item Index inside Inventory and the amount of Loaded Ammo.
  * @return void
  */
 void AHordeBaseCharacter::ActiveItemChanged(FString ItemID, int32 ItemIndex, int32 LoadedAmmo)
 {
+	// Stop firing on both client and server
 	StopWeaponFire();
-	if (CurrentSelectedFirearm)
-	{
-		CurrentSelectedFirearm->Destroy();
-	}
 
-	FItem NewFirearmItem = UInventoryHelpers::FindItemByID(FName(*ItemID));
-	if (NewFirearmItem.ItemID != "None" && NewFirearmItem.FirearmClass != nullptr)
+	// Only the server should spawn/destroy firearms - clients get the replicated actor
+	if (HasAuthority())
 	{
-		FTransform NullTransform;
-		CurrentSelectedFirearm = GetWorld()->SpawnActorDeferred<ABaseFirearm>(NewFirearmItem.FirearmClass, NullTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 		if (CurrentSelectedFirearm)
 		{
-			CurrentSelectedFirearm->WeaponID = ItemID;
-			CurrentSelectedFirearm->LoadedAmmo = LoadedAmmo;
-			CurrentSelectedFirearm->FireMode = (uint8)NewFirearmItem.DefaultFireMode;
-			CurrentSelectedFirearm->FinishSpawning(NullTransform);
-			CurrentSelectedFirearm->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, NewFirearmItem.AttachmentPoint);
+			CurrentSelectedFirearm->Destroy();
 		}
+
+		FItem NewFirearmItem = UInventoryHelpers::FindItemByID(FName(*ItemID));
+		if (NewFirearmItem.ItemID != "None" && NewFirearmItem.FirearmClass != nullptr)
+		{
+			FTransform NullTransform;
+			CurrentSelectedFirearm = GetWorld()->SpawnActorDeferred<ABaseFirearm>(NewFirearmItem.FirearmClass, NullTransform, this, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
+			if (CurrentSelectedFirearm)
+			{
+				CurrentSelectedFirearm->WeaponID = ItemID;
+				CurrentSelectedFirearm->LoadedAmmo = LoadedAmmo;
+				CurrentSelectedFirearm->FireMode = (uint8)NewFirearmItem.DefaultFireMode;
+				CurrentSelectedFirearm->FinishSpawning(NullTransform);
+				CurrentSelectedFirearm->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, NewFirearmItem.AttachmentPoint);
+			}
+		}
+
+		// Only server sets AnimMode - it will replicate to clients
+		AnimMode = NewFirearmItem.AnimType;
 	}
-	AnimMode = NewFirearmItem.AnimType;
 }
 
 /**

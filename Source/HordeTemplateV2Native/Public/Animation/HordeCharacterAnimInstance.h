@@ -47,4 +47,11 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Animation")
 		AHordeBaseCharacter* Character;
+
+private:
+	/** Target aim rotation for interpolation (used for remote players) */
+	float TargetAimRotation = 0.f;
+
+	/** Interpolation speed for remote player aim smoothing */
+	static constexpr float AimInterpSpeed = 10.f;
 };

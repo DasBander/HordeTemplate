@@ -194,7 +194,8 @@ bool AHordePlayerState::AcceptCharacterTrade_Validate()
 }
 
 /** ( Client )
- * Function that is getting called when getting kicked. Will End Session and disconnects from the current game.
+ * Function that is getting called when getting kicked. Disconnects from the current game.
+ * Note: This runs on the CLIENT - GetAuthGameMode() is not available here.
  *
  * @param
  * @return void
@@ -202,27 +203,10 @@ bool AHordePlayerState::AcceptCharacterTrade_Validate()
 void AHordePlayerState::GettingKicked_Implementation()
 {
 	APlayerController* PC = Cast<APlayerController>(GetOwner());
-	if (PC)
+	if (PC && GetWorld())
 	{
-		if (GetWorld())
-		{
-			AGameMode* GM = Cast<AGameMode>(GetWorld()->GetAuthGameMode());
-			if (GM)
-			{
-				AHordeGameSession* GSS = Cast<AHordeGameSession>(GetWorld()->GetAuthGameMode()->GameSession);
-				if (GSS)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Ending Session."));
-					GSS->EndGameSession();
-				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Unable to get Game Session."));
-				}
-			}
-
-			PC->ConsoleCommand("disconnect?message=disconnectedfromgame", false);
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Player being kicked - disconnecting from server."));
+		PC->ConsoleCommand("disconnect?message=kickedfromgame", false);
 	}
 }
 

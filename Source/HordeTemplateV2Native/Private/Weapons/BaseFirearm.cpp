@@ -303,10 +303,27 @@ void ABaseFirearm::ExecuteFireSequence()
 		return;
 	}
 
-	// Validate we can still fire
-	if (!CanFire())
+	// Check if we should stop firing (permanent conditions)
+	AHordeBaseCharacter* OwnerChar = GetOwningCharacter();
+	if (!OwnerChar || OwnerChar->GetIsDead() || OwnerChar->Reloading)
 	{
 		ServerStopFiring();
+		return;
+	}
+
+	// Check ammo
+	if (LoadedAmmo <= 0)
+	{
+		ServerStopFiring();
+		return;
+	}
+
+	// Check fire rate timing - if not ready, just skip this tick (don't stop)
+	const double CurrentTime = GetWorld()->GetTimeSeconds();
+	const double TimeSinceLastShot = CurrentTime - LastFireTime;
+	if (TimeSinceLastShot < CachedFireRate)
+	{
+		// Not enough time has passed, wait for next timer tick
 		return;
 	}
 
@@ -320,14 +337,6 @@ void ABaseFirearm::ExecuteFireSequence()
 		if (CurrentBurstCount >= MaxBurstCount)
 		{
 			OnBurstComplete();
-		}
-	}
-	// Handle auto mode - check if we should continue
-	else if (FiringState == EWeaponFiringState::AutoFiring)
-	{
-		if (LoadedAmmo <= 0)
-		{
-			ServerStopFiring();
 		}
 	}
 }
@@ -376,33 +385,8 @@ void ABaseFirearm::ServerFireFirearm_Implementation()
 
 bool ABaseFirearm::ServerFireFirearm_Validate()
 {
-	// Validate owner
-	AHordeBaseCharacter* OwnerChar = GetOwningCharacter();
-	if (!OwnerChar)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ServerFireFirearm_Validate: No owner character"));
-		return false;
-	}
-
-	// Validate this weapon belongs to the owner
-	if (OwnerChar->GetCurrentFirearm() != this)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ServerFireFirearm_Validate: Weapon doesn't match owner's current firearm"));
-		return false;
-	}
-
-	// Validate owner is not dead
-	if (OwnerChar->GetIsDead())
-	{
-		return false;
-	}
-
-	// Validate has ammo (prevent spam of empty fire requests)
-	if (LoadedAmmo <= 0)
-	{
-		return false;
-	}
-
+	// Never kick players for fire requests - invalid states are handled in the implementation
+	// Kicking for validation failure causes game restarts when client/server state desyncs
 	return true;
 }
 
@@ -502,14 +486,25 @@ void ABaseFirearm::ServerStopFiring_Implementation()
 		return;
 	}
 
-	// Clear fire timer
-	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+	// Gracefully handle invalid states (validation doesn't kick, but we still check)
+	AHordeBaseCharacter* OwnerChar = GetOwningCharacter();
+	if (!OwnerChar || OwnerChar->GetCurrentFirearm() != this)
+	{
+		// Weapon is no longer the active weapon or owner changed - just clean up state
+		GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+		FiringState = EWeaponFiringState::Idle;
+		bIsFiring = false;
+		return;
+	}
 
 	// Don't stop burst mid-sequence (let it complete)
 	if (FiringState == EWeaponFiringState::BurstFiring)
 	{
 		return;
 	}
+
+	// Clear fire timer only for non-burst modes
+	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
 
 	// Stop auto fire
 	if (FiringState == EWeaponFiringState::AutoFiring)
@@ -523,6 +518,8 @@ void ABaseFirearm::ServerStopFiring_Implementation()
 
 bool ABaseFirearm::ServerStopFiring_Validate()
 {
+	// Stop firing is always a safe operation - never kick for trying to stop
+	// Invalid states are handled gracefully in the implementation
 	return true;
 }
 
