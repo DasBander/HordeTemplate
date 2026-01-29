@@ -29,6 +29,8 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void Tick(float DeltaTime) override;
+
 	UFUNCTION(Server, WithValidation, Reliable, Category = "Spectator")
 		void ServerFocusPlayer();
 
@@ -36,4 +38,21 @@ public:
 		void ClientFocusPlayer(AHordeBaseCharacter* Player);
 
 	AHordeBaseCharacter* GetRandomAlivePlayer();
+
+protected:
+	/** Current player being spectated */
+	UPROPERTY()
+	AHordeBaseCharacter* CurrentSpectateTarget = nullptr;
+
+	/** Smoothed camera location for spectating */
+	FVector SmoothedCameraLocation = FVector::ZeroVector;
+
+	/** Smoothed camera rotation for spectating */
+	FRotator SmoothedCameraRotation = FRotator::ZeroRotator;
+
+	/** Whether we've initialized the smoothed values */
+	bool bSmoothedValuesInitialized = false;
+
+	/** Interpolation speed for camera smoothing */
+	static constexpr float CameraInterpSpeed = 15.f;
 };

@@ -17,7 +17,11 @@
  * @param
  * @return
  */
-ABaseSpectator::ABaseSpectator() { }
+ABaseSpectator::ABaseSpectator()
+{
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+}
 
 
 /** ( Virtual; Overridden )
@@ -34,6 +38,49 @@ void ABaseSpectator::SetupPlayerInputComponent(class UInputComponent* PlayerInpu
 
 }
 
+/**
+ *	Tick - Smoothly interpolate camera when spectating another player.
+ *
+ * @param DeltaTime
+ * @return void
+ */
+void ABaseSpectator::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	// Only smooth camera on the local client when spectating someone
+	if (CurrentSpectateTarget && IsLocallyControlled())
+	{
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if (PC && PC->PlayerCameraManager)
+		{
+			// Get target camera location from the spectated player's camera
+			UCameraComponent* TargetCamera = CurrentSpectateTarget->GetCamera();
+			if (TargetCamera)
+			{
+				FVector TargetLocation = TargetCamera->GetComponentLocation();
+				FRotator TargetRotation = TargetCamera->GetComponentRotation();
+
+				// Initialize smoothed values on first tick
+				if (!bSmoothedValuesInitialized)
+				{
+					SmoothedCameraLocation = TargetLocation;
+					SmoothedCameraRotation = TargetRotation;
+					bSmoothedValuesInitialized = true;
+				}
+
+				// Smoothly interpolate towards target
+				SmoothedCameraLocation = FMath::VInterpTo(SmoothedCameraLocation, TargetLocation, DeltaTime, CameraInterpSpeed);
+				SmoothedCameraRotation = FMath::RInterpTo(SmoothedCameraRotation, TargetRotation, DeltaTime, CameraInterpSpeed);
+
+				// Apply smoothed transform to the spectator's location (camera will follow)
+				SetActorLocation(SmoothedCameraLocation);
+				PC->SetControlRotation(SmoothedCameraRotation);
+			}
+		}
+	}
+}
+
 /** ( Client )
  *	Focuses Player by Player Object.
  *
@@ -46,7 +93,12 @@ void ABaseSpectator::ClientFocusPlayer_Implementation(AHordeBaseCharacter* Playe
 	// Fixed: Added null check for Player parameter
 	if (PC && Player)
 	{
-		PC->SetViewTargetWithBlend(Player, 1.f, VTBlend_EaseIn, 0.5f, true);
+		// Store the current spectate target for smooth following
+		CurrentSpectateTarget = Player;
+		bSmoothedValuesInitialized = false; // Reset to snap to new target initially
+
+		// Set view target to ourselves - we'll manually track the target smoothly in Tick
+		PC->SetViewTarget(this);
 	}
 }
 
