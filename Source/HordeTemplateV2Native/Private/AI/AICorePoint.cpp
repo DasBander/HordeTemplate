@@ -4,7 +4,7 @@
 
 #include "AICorePoint.h"
 #include "HordeTemplateV2Native.h"
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 
 /**
  * @file AICorePoint.cpp

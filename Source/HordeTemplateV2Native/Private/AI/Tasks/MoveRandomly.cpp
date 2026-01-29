@@ -5,7 +5,7 @@
 #include "MoveRandomly.h"
 #include "AIController.h"
 #include "GameFramework/Pawn.h"
-#include "NavigationSystem/Public/NavigationSystem.h"
+#include "NavigationSystem.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/PathFollowingComponent.h"
 

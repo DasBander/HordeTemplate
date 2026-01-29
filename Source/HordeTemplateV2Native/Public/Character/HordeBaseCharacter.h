@@ -17,7 +17,7 @@
 #include "Gameplay/GameplayStructures.h"
 #include "Inventory/InventoryComponent.h"
 #include "HUD/HordeBaseHud.h"
-#include "AIModule/Classes/Perception/AIPerceptionStimuliSourceComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "HordeBaseCharacter.generated.h"
 
 UCLASS()

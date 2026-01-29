@@ -3,10 +3,10 @@
 // Licensed under the MIT License
 
 #include "MoveToEnemy.h"
-#include "AIModule/Classes/AIController.h"
+#include "AIController.h"
 #include "GameFramework/Pawn.h"
-#include "NavigationSystem/Public/NavigationSystem.h"
-#include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
+#include "NavigationSystem.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Navigation/PathFollowingComponent.h"
 #include "Character/HordeBaseCharacter.h"
 

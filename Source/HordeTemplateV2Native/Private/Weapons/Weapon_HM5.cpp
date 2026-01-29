@@ -9,7 +9,7 @@
  * @brief Implementation of HM5 assault rifle with mesh, muzzle flash, and sound setup
  * @author Marc Fraedrich
  */
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 
 /**
  * Constructor for AWeapon_HM5

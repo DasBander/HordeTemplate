@@ -6,7 +6,7 @@
 #include "Character/HordeBaseCharacter.h"
 #include "AI/ZedPawn.h"
 #include "AI/ZedAIController.h"
-#include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "HordeTemplateV2Native.h"
 
 /**

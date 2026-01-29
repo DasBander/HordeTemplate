@@ -13,7 +13,7 @@
 #include "Character/HordeBaseCharacter.h"
 #include "Animation/AnimMontage.h"
 #include "Animation/AnimInstance.h"
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 
 /** ( Overridden )
  * Defines Replicated Props

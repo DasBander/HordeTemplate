@@ -9,7 +9,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/BillboardComponent.h"
 #include "DrawDebugHelpers.h"
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Runtime/Engine/Public/EngineUtils.h"
 
 /**

@@ -17,7 +17,7 @@
 #include "HordeTemplateV2Native.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "FX/Camera/CameraShake_Explosion.h"
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 
 /**
  * Constructor for AExplosiveProjectile

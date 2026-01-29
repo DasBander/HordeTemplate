@@ -10,7 +10,7 @@
  * @brief Implementation of blood impact with flesh-specific particle and sound effects
  * @author Marc Fraedrich
  */
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 
 /**
  *	Constructor for ABloodImpact. Overriding Impact Sound and Particle.

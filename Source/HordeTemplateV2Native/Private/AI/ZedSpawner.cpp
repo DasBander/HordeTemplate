@@ -13,7 +13,7 @@
 #include "Engine/World.h"
 #include "DrawDebugHelpers.h"
 #include "Runtime/Engine/Public/EngineUtils.h"
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Net/UnrealNetwork.h"
 
 /**

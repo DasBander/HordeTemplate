@@ -4,10 +4,10 @@
 
 #include "ZedAIController.h"
 #include "ZedPawn.h"
-#include "AIModule/Classes/BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "HordeTemplateV2Native.h"
 #include "Character/HordeBaseCharacter.h"
-#include "AIModule/Classes/BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 /**

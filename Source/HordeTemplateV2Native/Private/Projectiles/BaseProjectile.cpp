@@ -9,7 +9,7 @@
  * @brief Implementation of replicated projectile with bounce, impact FX, and damage system
  * @author Marc Fraedrich
  */
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Engine/StaticMesh.h"

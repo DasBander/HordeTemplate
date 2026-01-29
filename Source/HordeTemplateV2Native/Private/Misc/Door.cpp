@@ -3,7 +3,7 @@
 // Licensed under the MIT License
 
 #include "Door.h"
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimBlueprintGeneratedClass.h"
 

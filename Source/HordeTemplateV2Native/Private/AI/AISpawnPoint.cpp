@@ -4,7 +4,7 @@
 
 #include "AISpawnPoint.h"
 #include "Components/CapsuleComponent.h"
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 #include "GameFramework/Character.h"
 
 /**

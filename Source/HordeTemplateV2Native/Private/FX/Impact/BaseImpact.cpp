@@ -9,7 +9,7 @@
  * @brief Implementation of base impact effect with particle and sound setup
  * @author Marc Fraedrich
  */
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 
 /**
  *	Constructor for ABaseImpact. Constructs Base Impact by setting the Particle and Impact Sound.

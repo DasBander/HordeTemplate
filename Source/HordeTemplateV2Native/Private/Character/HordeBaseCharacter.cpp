@@ -17,7 +17,7 @@
 #include "Weapons/BaseFirearm.h"
 #include "HUD/Widgets/PlayerHeadDisplay.h"
 #include "HordePlayerState.h"
-#include "AIModule/Classes/Perception/AISense_Sight.h"
+#include "Perception/AISense_Sight.h"
 #include "FX/Camera/CameraShake_Damage.h"
 
 

@@ -11,7 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Animation/AnimBlueprintGeneratedClass.h"
 #include "Animation/AnimInstance.h"
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 
 /**
  * @file HordeTrader.cpp

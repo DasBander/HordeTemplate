@@ -9,7 +9,7 @@
  * @brief Implementation of grenade launcher with custom mesh and disabled muzzle flash
  * @author Marc Fraedrich
  */
-#include "ConstructorHelpers.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Engine/SkeletalMesh.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInstanceConstant.h"
