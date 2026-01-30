@@ -201,10 +201,14 @@ float AZedPawn::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent,
 	{
 		if (!IsDead)
 		{
+			// For radial damage, calculate direction away from explosion center
+			const FRadialDamageEvent* RadialEvent = static_cast<const FRadialDamageEvent*>(&DamageEvent);
+			FVector ImpulseDirection = (GetActorLocation() - RadialEvent->Origin).GetSafeNormal();
+
 			ACharacter* PLY = Cast<ACharacter>(DamageCauser);
 			if (PLY)
 			{
-				KillAI(PLY, EPointType::EPointCasual);
+				KillAI(PLY, EPointType::EPointCasual, ImpulseDirection);
 			}
 		}
 	}
@@ -220,11 +224,10 @@ float AZedPawn::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent,
 				if (HitRes.BoneName == "head")
 				{
 					PlayHeadShotFX();
-					DeathFX(HitDirection);
 					ACharacter* PLY = Cast<ACharacter>(DamageCauser);
 					if (PLY)
 					{
-						KillAI(PLY, EPointType::EPointHeadShot);
+						KillAI(PLY, EPointType::EPointHeadShot, HitDirection);
 					}
 				}
 				else
@@ -232,11 +235,10 @@ float AZedPawn::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent,
 					Health = FMath::Clamp<float>((Health - Damage), 0.f, 100.f);
 					if (Health <= 0)
 					{
-						DeathFX(HitDirection);
 						ACharacter* PLY = Cast<ACharacter>(DamageCauser);
 						if (PLY)
 						{
-							KillAI(PLY, EPointType::EPointCasual);
+							KillAI(PLY, EPointType::EPointCasual, HitDirection);
 						}
 					}
 					else
@@ -260,10 +262,10 @@ float AZedPawn::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent,
 /**
  *	Sets AI as Dead. Gives killer points depending on kill type and updates alive zombies.
  *
- * @param ACharacter as killer and the Point Type
+ * @param ACharacter as killer, the Point Type, and the impact direction for ragdoll force
  * @return void
  */
-void AZedPawn::KillAI(ACharacter* Killer, EPointType KillType)
+void AZedPawn::KillAI(ACharacter* Killer, EPointType KillType, FVector ImpactDirection)
 {
 	IsDead = true;
 	Health = 0.f;
@@ -286,16 +288,16 @@ void AZedPawn::KillAI(ACharacter* Killer, EPointType KillType)
 	{
 		AIC->GetBlackboardComponent()->SetValueAsBool("IsDead", true);
 	}
-	DeathFX(FVector(0.f, 0.f, 0.f));
+
+	// Apply death effects with the correct impact direction
+	DeathFX(ImpactDirection);
 	SetLifeSpan(10.f);
-	
 
 	AHordeGameState* GS = Cast<AHordeGameState>(GetWorld()->GetGameState());
 	if (GS)
 	{
 		GS->UpdateAliveZeds();
 	}
-
 }
 
 

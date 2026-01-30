@@ -16,6 +16,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "GameFramework/Actor.h"
 #include "Sound/SoundCue.h"
+#include "Camera/CameraShakeBase.h"
 #include "BaseFirearm.generated.h"
 
 class AHordeBaseCharacter;
@@ -100,6 +101,24 @@ public:
 	/** Time to reset spread after not firing (seconds) */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Firearm|Spread")
 		float SpreadResetTime = 0.3f;
+
+	// ==================== RECOIL CONFIGURATION ====================
+
+	/** Vertical recoil (pitch kick) per shot in degrees - positive = up */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Firearm|Recoil")
+		float RecoilPitch = 0.5f;
+
+	/** Horizontal recoil (yaw kick) per shot in degrees - randomly left or right */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Firearm|Recoil")
+		float RecoilYaw = 0.2f;
+
+	/** How fast the recoil recovers (degrees per second) */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Firearm|Recoil")
+		float RecoilRecoverySpeed = 5.0f;
+
+	/** Camera shake class to play when firing (optional) */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Firearm|Recoil")
+		TSubclassOf<UCameraShakeBase> FireCameraShake;
 
 	// ==================== SERVER RPCS ====================
 

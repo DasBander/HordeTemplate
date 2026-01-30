@@ -571,6 +571,39 @@ void ABaseFirearm::PlayFirearmFX_Implementation()
 	{
 		WeaponSound->Play();
 	}
+
+	// Apply recoil only to the owning player
+	AHordeBaseCharacter* OwnerChar = GetOwningCharacter();
+	if (OwnerChar && OwnerChar->IsLocallyControlled())
+	{
+		APlayerController* PC = Cast<APlayerController>(OwnerChar->GetController());
+		if (PC)
+		{
+			// Apply direct camera recoil for immediate kick feel
+			float PitchRecoil = -RecoilPitch; // Negative pitch = look up
+			float YawRecoil = FMath::RandRange(-RecoilYaw, RecoilYaw); // Random left/right
+
+			PC->AddPitchInput(PitchRecoil);
+			PC->AddYawInput(YawRecoil);
+
+			// Play camera shake for additional feedback
+			if (FireCameraShake)
+			{
+				PC->ClientStartCameraShake(FireCameraShake, 1.0f);
+			}
+
+			// Force feedback (controller rumble) for weapon fire
+			PC->PlayDynamicForceFeedback(
+				0.3f,   // Intensity
+				0.1f,   // Duration
+				true,   // Left large
+				false,  // Left small
+				true,   // Right large
+				false,  // Right small
+				EDynamicForceFeedbackAction::Start
+			);
+		}
+	}
 }
 
 

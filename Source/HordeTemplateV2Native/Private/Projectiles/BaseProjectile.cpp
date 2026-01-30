@@ -114,7 +114,10 @@ void ABaseProjectile::OnProjectileBounce(const FHitResult& ImpactResult, const F
 			TracerMesh->SetVisibility(false);
 			// Fixed: Pass the owner's InstigatorController for proper kill attribution
 			AController* InstigatorController = GetOwner() ? GetOwner()->GetInstigatorController() : nullptr;
-			UGameplayStatics::ApplyPointDamage(ImpactResult.GetActor(), Damage, CollisionSphere->GetComponentLocation(), ImpactResult, InstigatorController, GetOwner(), nullptr);
+			// Fixed: Use projectile velocity direction instead of location for HitFromDirection
+			// ApplyPointDamage expects a normalized direction, not a world position
+			FVector ShotDirection = ImpactVelocity.GetSafeNormal();
+			UGameplayStatics::ApplyPointDamage(ImpactResult.GetActor(), Damage, ShotDirection, ImpactResult, InstigatorController, GetOwner(), nullptr);
 		}
 	}
 

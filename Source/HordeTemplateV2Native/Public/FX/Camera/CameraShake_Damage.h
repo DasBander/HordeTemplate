@@ -6,21 +6,23 @@
 
 /**
  * @file CameraShake_Damage.h
- * @brief Camera shake effect triggered when the player takes damage
+ * @brief AAA-quality camera shake when player takes damage
  * @author Marc Fraedrich
  */
 
 #include "CoreMinimal.h"
+#include "Camera/CameraShakeBase.h"
+#include "PerlinNoiseCameraShakePattern.h"
 #include "CameraShake_Damage.generated.h"
 
 /**
- * 
+ * AAA-quality damage camera shake - sharp hit with disorienting feel
  */
-UCLASS()
-class HORDETEMPLATEV2NATIVE_API UCameraShake_Damage : public UObject
+UCLASS(Blueprintable, BlueprintType)
+class HORDETEMPLATEV2NATIVE_API UCameraShake_Damage : public UCameraShakeBase
 {
 	GENERATED_BODY()
-public:
 
+public:
 	UCameraShake_Damage();
 };

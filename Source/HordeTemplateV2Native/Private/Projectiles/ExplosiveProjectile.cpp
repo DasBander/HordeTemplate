@@ -10,6 +10,7 @@
  * @author Marc Fraedrich
  */
 #include "Components/StaticMeshComponent.h"
+#include "Components/PointLightComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
@@ -73,26 +74,81 @@ void AExplosiveProjectile::OnProjectileImpact(const FHitResult& ImpactResult, co
 }
 
 /** ( Multicast )
- * Plays Explosion Particle and Sound. Also plays global camera shake.
+ * Plays Explosion Particle and Sound. Also plays global camera shake and force feedback.
  *
  * @param Impact Epicenter
  * @return void
  */
 void AExplosiveProjectile::PlayWorldFX_Implementation(FVector Epicenter)
 {
+	// Sound effect
 	USoundCue* ExpSound = ObjectFromPath<USoundCue>(TEXT("SoundCue'/Game/HordeTemplateBP/Assets/Sounds/A_GranadeExplosion.A_GranadeExplosion'"));
 	if (ExpSound)
 	{
 		UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ExpSound, Epicenter);
 	}
+
+	// Particle effect
 	UParticleSystem* ExpEmitter = ObjectFromPath<UParticleSystem>(TEXT("ParticleSystem'/Game/HordeTemplateBP/Assets/Effects/P_Explosion.P_Explosion'"));
 	if (ExpEmitter)
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExpEmitter, Epicenter);
 	}
 
+	// AAA-quality camera shake using Perlin noise pattern
+	UGameplayStatics::PlayWorldCameraShake(GetWorld(), UCameraShake_Explosion::StaticClass(), Epicenter, 500.f, 3000.f, 1.f, false);
 
-	UGameplayStatics::PlayWorldCameraShake(GetWorld(), UCameraShake_Explosion::StaticClass(), Epicenter, 0.f, 8000.f, 1.f, true);
+	// Force feedback (controller rumble) for nearby players
+	const float MaxFeedbackDistance = 3000.f;
+	APlayerController* LocalPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (LocalPC && LocalPC->GetPawn())
+	{
+		float Distance = FVector::Dist(LocalPC->GetPawn()->GetActorLocation(), Epicenter);
+		if (Distance < MaxFeedbackDistance)
+		{
+			// Scale intensity based on distance (closer = stronger)
+			float Intensity = 1.0f - (Distance / MaxFeedbackDistance);
+			Intensity = FMath::Clamp(Intensity, 0.1f, 1.0f);
+
+			// Play force feedback
+			LocalPC->PlayDynamicForceFeedback(
+				Intensity,          // Intensity
+				0.3f,               // Duration
+				true,               // Affects left large
+				true,               // Affects left small
+				true,               // Affects right large
+				true,               // Affects right small
+				EDynamicForceFeedbackAction::Start
+			);
+		}
+	}
+
+	// Spawn a brief point light for visual flash
+	if (UWorld* World = GetWorld())
+	{
+		// Use a simple approach - spawn light component attached to nothing, it will auto-destroy
+		UPointLightComponent* FlashLight = NewObject<UPointLightComponent>(World);
+		if (FlashLight)
+		{
+			FlashLight->SetWorldLocation(Epicenter);
+			FlashLight->SetIntensity(50000.f);
+			FlashLight->SetLightColor(FLinearColor(1.0f, 0.7f, 0.3f)); // Orange-ish
+			FlashLight->SetAttenuationRadius(2000.f);
+			FlashLight->RegisterComponent();
+
+			// Fade out the light over time
+			FTimerHandle LightFadeTimer;
+			FTimerDelegate LightFadeDelegate;
+			LightFadeDelegate.BindLambda([FlashLight]()
+			{
+				if (FlashLight && FlashLight->IsValidLowLevel())
+				{
+					FlashLight->DestroyComponent();
+				}
+			});
+			World->GetTimerManager().SetTimer(LightFadeTimer, LightFadeDelegate, 0.15f, false);
+		}
+	}
 }
 
 bool AExplosiveProjectile::PlayWorldFX_Validate(FVector Epicenter)

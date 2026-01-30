@@ -128,7 +128,7 @@ protected:
 		float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	UFUNCTION()
-		void KillAI(ACharacter* Killer, EPointType KillType);
+		void KillAI(ACharacter* Killer, EPointType KillType, FVector ImpactDirection = FVector::ZeroVector);
 
 	UFUNCTION()
 		void OnCharacterInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

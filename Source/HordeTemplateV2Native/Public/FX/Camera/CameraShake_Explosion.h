@@ -6,22 +6,23 @@
 
 /**
  * @file CameraShake_Explosion.h
- * @brief Camera shake effect triggered by nearby explosions with distance falloff
+ * @brief AAA-quality camera shake system for explosions
  * @author Marc Fraedrich
  */
 
 #include "CoreMinimal.h"
+#include "Camera/CameraShakeBase.h"
+#include "PerlinNoiseCameraShakePattern.h"
 #include "CameraShake_Explosion.generated.h"
 
 /**
- * 
+ * AAA-quality explosion camera shake using Perlin noise for organic feel
  */
-UCLASS()
-class HORDETEMPLATEV2NATIVE_API UCameraShake_Explosion : public UObject
+UCLASS(Blueprintable, BlueprintType)
+class HORDETEMPLATEV2NATIVE_API UCameraShake_Explosion : public UCameraShakeBase
 {
 	GENERATED_BODY()
-public:
 
+public:
 	UCameraShake_Explosion();
-	
 };
